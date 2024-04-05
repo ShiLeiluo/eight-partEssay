@@ -131,6 +131,10 @@ Map，代表键值对的集合，典型代表就是 HashMap。
 			允许插入一个 null
 			
 		2) Queue/接口/继承自Collection接口
+		
+		LinkedList, ArrayDeque, 实现了Queue的子接口Deque
+		PriorityQueue, 单向队列, 3个都实现了Queue接口
+		
 		队列(Queue)：队列简称队，也是一种操作受限的线性表，只允许在表的一端进行插入，而在表的另一端进行删除。向队列中插入元素称为入队或进队；删除元素称为出队或离队。
 		符合先进先出(First In First Out/FIFO)的设计原则
 		
@@ -157,6 +161,7 @@ Map，代表键值对的集合，典型代表就是 HashMap。
 				PriorityQueue 是一种优先级队列，它的出队顺序与元素的优先级有关，执行 remove 或者 poll 方法，返回的总是优先级最高的元素。
 			
 		3) List/接口/继承Collection接口
+		ArrayList, LinkedList, Vector
 			@@@1)) LinkedList/List实现类
 			LinkedList类实现了Queue接口，因此我们可以把LinkedList当成Queue来用。
 			基于 链表 实现的链式双向队列，通常作为栈或队列使用，但是队列的效率不如ArrayQueue高
@@ -262,8 +267,8 @@ Collections是针对集合类的一个帮助类，他提供一系列静态方法
 							4))) DelayQueue
 							5))) LinkedBlockingQueue
 							
-							6))) BlockingDeque
-							7))) LinkedBlockingDeque
+							6))) BlockingQueue
+							7))) LinkedBlockingQueue
 							
 							8))) TransferQueue
 							9))) LinkedTransferQueue
@@ -278,6 +283,9 @@ Collections是针对集合类的一个帮助类，他提供一系列静态方法
 						3)) ConcurrentLinkedDeque
 						4)) ConcurrentLinkedQueue
 						5)) ConcurrentSkipListMap
+					4) List
+						手动加锁
+						Collections.synchronizedList()
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------		
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1268,6 +1276,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 					当 10 个小任务都执行完之后，再合并这 10 个小任务的结果，这个时候就可以用 CyclicBarrier 来实现。
 				CyclicBarrier 还有一个有参构造方法，可以指定一个 Runnable，这个 Runnable 会在 CyclicBarrier 的计数器为 0 的时候执行，用来完成更复杂的任务。
 			4) Exchanger
+					只能是2个线程,它不支持更多的线程之间互换数据。
 				Exchanger 是一个用于线程间协作的工具类。Exchanger 用于进行线程间的数据交换。它提供一个同步点，在这个同步点，两个线程可以交换彼此的数据。
 				这两个线程通过 exchange 方法交换数据，如果第一个线程先执行 exchange 方法，它会一直等待第二个线程也执行 exchange 方法，当两个线程都到达同步点时，这两个线程就可以交换数据，将本线程生产出来的数据传递给对方。
 				Exchanger 可以用于遗传算法、校对工作和数据同步等场景。
@@ -1288,7 +1297,216 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 						与Future和FutureTask相比，CompletableFuture提供了更丰富的API，可以更方便地处理异步任务的组合和链式调用。它支持链式编程，可以通过.thenApply(), .thenAccept(), .thenCompose()等方法来连接多个异步任务。
 16. 重入锁ReentrantLock
 		1) 深入理解Java并发重入锁ReentrantLock
+			ReentrantLock 重入锁，是实现Lock 接口的一个类，也是在实际编程中使用频率很高的一个锁，支持重入性，表示能够对共享资源重复加锁，即当前线程获取该锁后再次获取不会被阻塞。
+			要想支持重入性，就要解决两个问题：
+			在线程获取锁的时候，如果已经获取锁的线程是当前线程的话则直接再次获取成功；
+			由于锁会被获取 n 次，那么只有锁在被释放同样的 n 次之后，该锁才算是完全释放成功。
+			我们知道，同步组件主要是通过重写 AQS 的几个 protected 方法来表达自己的同步语义。
+		2) ReentrantLock 与 synchronized
+			1. ReentrantLock 是一个类，而 synchronized 是 Java 中的关键字；
+			2. ReentrantLock 可以实现多路选择通知（可以绑定多个 Condition），而 synchronized 只能通过 wait 和 notify/notifyAll 方法唤醒一个线程或者唤醒全部线程（单路通知）；
+			3. ReentrantLock 必须手动释放锁。通常需要在 finally 块中调用 unlock 方法以确保锁被正确释放。
+			4. synchronized 会自动释放锁，当同步块执行完毕时，由 JVM 自动释放，不需要手动操作。
+			5. ReentrantLock: 通常提供更好的性能，特别是在高竞争环境下。
+			6. synchronized: 在某些情况下，性能可能稍差一些，但随着 JDK 版本的升级，性能差距已经不大了。
+		3) lock相比synchronized
+			灵活性： Lock接口提供了更多的锁定控制方法，允许你更精细地控制锁定的行为。例如，你可以使用tryLock()方法尝试获取锁，可以设置超时时间，还可以使用lockInterruptibly()方法来实现可中断的锁定。
+			可中断性： Lock接口的锁定方法允许线程在等待锁时被中断，而synchronized块不支持线程的中断等待。
+			公平性： Lock接口的一些实现类允许你指定锁的公平性，以确保等待时间最长的线程优先获取锁。在synchronized块中，锁的获取是不公平的，没有公平性选项。
+17. ReetrantReadWriteLock
+		1) ReentrantReadWriteLock 是 Java 的一种读写锁，它允许多个读线程同时访问，但只允许一个写线程访问（会阻塞所有的读写线程）。这种锁的设计可以提高性能，特别是在读操作的数量远远超过写操作的情况下。
+			在并发场景中，为了解决线程安全问题，我们通常会使用关键字 synchronized 或者 JUC 包中实现了 Lock 接口的 ReentrantLock。但它们都是独占式获取锁，也就是在同一时刻只有一个线程能够获取锁。
+			而在一些业务场景中，大部分只是读数据，写数据很少，如果仅仅是读数据的话并不会影响数据正确性，而如果在这种业务场景下，依然使用独占锁的话，很显然会出现性能瓶颈。
+			针对这种读多写少的情况，Java 提供了另外一个实现 Lock 接口的 ReentrantReadWriteLock——读写锁。
+		2) 读写锁的特性：
+			1）公平性选择：支持非公平性（默认）和公平的锁获取方式，非公平的吞吐量优于公平；
+			2）重入性：支持重入，读锁获取后能再次获取，写锁获取之后能够再次获取写锁，同时也能够获取读锁；
+			3）锁降级：写锁降级是一种允许写锁转换为读锁的过程。通常的顺序是：
+				获取写锁：线程首先获取写锁，确保在修改数据时排它访问。
+				获取读锁：在写锁保持的同时，线程可以再次获取读锁。
+				释放写锁：线程保持读锁的同时释放写锁。
+				释放读锁：最后线程释放读锁。
+				这样，写锁就降级为读锁，允许其他线程进行并发读取，但仍然排除其他线程的写操作
+							小结
+		ReentrantReadWriteLock 是 Java 的一种读写锁，它允许多个读线程同时访问，但只允许一个写线程访问，或者阻塞所有的读写线程。这种锁的设计可以提高性能，特别是在数据结构中，读操作的数量远远超过写操作的情况下。
+		读写锁的实现主要是通过重写 AQS 的 tryAcquire 方法和 tryRelease 方法实现的，读锁和写锁的获取和释放都是通过这两个方法实现的。
+		读写锁支持锁降级，遵循按照获取写锁，获取读锁再释放写锁的次序，写锁能够降级成为读锁，不支持锁升级。
+18. 等待通知条件Condition	
+		Condition 接口是 Java 并发编程中一个重要的组件，用于线程间的协调和通信。它通常与锁（特别是 ReentrantLock）一起使用，为线程提供了一种等待某个条件成真的机制，并
+		允许其他线程在该条件变化时通知等待线程。这为线程间的协调提供了更灵活、更强大的工具。
+		    private static ReentrantLock lock = new ReentrantLock();
+			private static Condition condition = lock.newCondition();
+			condition.await(); condition.signalAll();
+19. 线程阻塞唤醒类LockSupport
+		1) LockSupprot 用来阻塞和唤醒线程，底层实现依赖于 Unsafe 类
+		2) 阻塞线程
+				1. void park()：阻塞当前线程，如果调用 unpark 方法或线程被中断，则该线程将变得可运行。请注意，park 不会抛出 InterruptedException，因此线程必须单独检查其中断状态。
+				2. void park(Object blocker)：功能同方法 1，入参增加一个 Object 对象，用来记录导致线程阻塞的对象，方便问题排查。
+				3. void parkNanos(long nanos)：阻塞当前线程一定的纳秒时间，或直到被 unpark 调用，或线程被中断。
+				4. void parkNanos(Object blocker, long nanos)：功能同方法 3，入参增加一个 Object 对象，用来记录导致线程阻塞的对象，方便问题排查。
+				5. void parkUntil(long deadline)：阻塞当前线程直到某个指定的截止时间（以毫秒为单位），或直到被 unpark 调用，或线程被中断。
+				6. void parkUntil(Object blocker, long deadline)：功能同方法 5，入参增加一个 Object 对象，用来记录导致线程阻塞的对象，方便问题排查。
+		 3) 唤醒线程
+				void unpark(Thread thread)：唤醒一个由 park 方法阻塞的线程。如果该线程未被阻塞，那么下一次调用 park 时将立即返回。这允许“先发制人”式的唤醒机制。
+				实际上，LockSupport 阻塞和唤醒线程的功能依赖于 sun.misc.Unsafe，这是一个很底层的类，后面这篇文章会细讲，比如 LockSupport 的 park 方法是通过 unsafe.park() 方法实现的。
+		4) Dump 线程
+			"Dump 线程"通常是指获取线程的当前状态和调用堆栈的详细快照。这可以提供关于线程正在执行什么操作以及线程在代码的哪个部分的重要信息。
+			线程转储可以通过各种方式获得，例如使用 Java 的 jstack 工具，或从 Java VisualVM、Java Mission Control 等工具获取。
+		5) 与synchronized的区别
+			1. synchronized 会使线程阻塞，线程会进入 BLOCKED 状态，而调用 LockSupprt 方法阻塞线程会使线程进入到 WAITING 状态。
+		6) 面试题
+			有 3 个独立的线程，一个只会输出 A，一个只会输出 B，一个只会输出 C，在三个线程启动的情况下，请用合理的方式让他们按顺序打印 ABCABC。
+			        t1 = new Thread(() -> {
+						for (int i = 0; i < 2; i++) {
+							LockSupport.park();
+							System.out.print("A");
+							LockSupport.unpark(t2);
+						}
+					});
+							小结
+		LockSupport 提供了一种更底层和灵活的线程调度方式。它不依赖于同步块或特定的锁对象。
+		可以用于构建更复杂的同步结构，例如自定义锁或并发容器。LockSupport.park 与 LockSupport.unpark 的组合使得线程之间的精确控制变得更容易，而不需要复杂的同步逻辑和对象监视。
+20. Java的并发容器ConcurrentHashMap、阻塞队列、CopyOnWrite容器等
+		1) Java 的并发集合容器提供了在多线程环境中高效访问和操作的数据结构。这些容器通过内部的同步机制实现了线程安全，使得开发者无需显式同步代码就能在并发环境下安全使用，
+			比如说：ConcurrentHashMap、阻塞队列和 CopyOnWrite 容器等。
+			java.util 包下提供了一些容器类（集合框架），其中 Vector 和 Hashtable 是线程安全的，但实现方式比较粗暴，通过在方法上加「sychronized」关键字实现。
+			但即便是 Vector 这样线程安全的类，在应对多线程的复合操作时也需要在客户端继续加锁以保证原子性。
+		2) 并发Map
+			1. ConcurrentMap接口
+				ConcurrentMap 接口继承了 Map 接口，在 Map 接口的基础上又定义了四个方法
+				1)) putIfAbsent： 与原有 put 方法不同的是，putIfAbsent 如果插入的 key 相同，则不替换原有的 value 值；
+				2)) remove： 与原有 remove 方法不同的是，新 remove 方法中增加了对 value 的判断，如果要删除的 key-value 不能与 Map 中原有的 key-value 对应上，则不会删除该元素;
+				3)) replace(K,V,V)： 增加了对 value 值的判断，如果 key-oldValue 能与 Map 中原有的 key-value 对应上，才进行替换操作；
+				4)) replace(K,V)： 与上面的 replace 不同的是，此 replace 不会对 Map 中原有的 key-value 进行比较，如果 key 存在则直接替换；
+			2. ConcurrentHashMap
+				ConcurrentHashMap 同 HashMap 一样，也是基于散列表的 map，但是它提供了一种与 Hashtable 完全不同的加锁策略，提供了更高效的并发性和伸缩性。
+			3. ConcurrentSkipListMap
+				ConcurrentNavigableMap 接口继承了 NavigableMap 接口，这个接口提供了针对给定搜索目标返回最接近匹配项的导航方法。
+				ConcurrentNavigableMap 接口继承了 NavigableMap 接口，这个接口提供了针对给定搜索目标返回最接近匹配项的导航方法。
+				ConcurrentNavigableMap 接口的主要实现类是 ConcurrentSkipListMap 类。从名字上来看，它的底层使用的是跳表（SkipList）。跳表是一种”空间换时间“的数据结构，可以使用 CAS 来保证并发安全性。
+				与 ConcurrentHashMap 的读密集操作相比，ConcurrentSkipListMap 的读和写操作的性能相对较低。这是由其数据结构导致的，因为跳表的插入和删除需要更复杂的指针操作。
+				然而，ConcurrentSkipListMap 提供了有序性，这是 ConcurrentHashMap 所没有的。
+				ConcurrentSkipListMap 适用于需要线程安全的同时又需要元素有序的场合。如果不需要有序，ConcurrentHashMap 可能是更好的选择，因为它通常具有更高的性能。
+		3) 并发Queue
+			JDK 并没有提供线程安全的 List 类，因为对 List 来说，很难去开发一个通用并且没有并发瓶颈的线程安全的 List。因为即使简单的读操作，比如 contains()，也需要再搜索的时候锁住整个 list。
+			所以退一步，JDK 提供了队列和双端队列的线程安全类：ConcurrentLinkedQueue 和 ConcurrentLinkedDeque。因为队列相对于 List 来说，有更多的限制。这两个类是使用 CAS 来实现线程安全的。
+		4) 并发Set
+			ConcurrentSkipListSet 是线程安全的有序集合。底层是使用 ConcurrentSkipListMap 来实现。
+			谷歌的 Guava实现了一个线程安全的 ConcurrentHashSet
+			Set 日常开发中用的并不多，所以这里就不展开细讲了。
+		5) 阻塞队列
+			1. 什么阻塞队列
+				我们假设一种场景，生产者一直生产资源，消费者一直消费资源（后面会细讲，戳链接直达），资源存储在一个缓冲池中，生产者将生产的资源存进缓冲池中，消费者从缓冲池中拿到资源进行消费，这就是大名鼎鼎的生产者-消费者模式。
+				该模式能够简化开发过程，一方面消除了生产者类与消费者类之间的代码依赖性，另一方面将生产数据的过程与使用数据的过程解耦简化负载。
+				我们自己 coding 实现这个模式的时候，因为需要让多个线程操作共享变量（即资源），所以很容易引发线程安全问题，造成重复消费和死锁，尤其是生产者和消费者存在多个的情况。
+				另外，当缓冲池空了，我们需要阻塞消费者，唤醒生产者；当缓冲池满了，我们需要阻塞生产者，唤醒消费者，这些个等待-唤醒逻辑都需要自己实现。
+				这么容易出错的事情，JDK 当然帮我们做啦，这就是阻塞队列（BlockingQueue），你只管往里面存、取就行，而不用担心多线程环境下存、取共享变量的线程安全问题。
+				
+				BlockingQueue 是 Java util.concurrent 包下重要的数据结构，区别于普通的队列，BlockingQueue 提供了线程安全的队列访问方式，并发包下很多高级同步类的实现都是基于 BlockingQueue 实现的。
+				
+				BlockingQueue 一般用于生产者-消费者模式，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。BlockingQueue 就是存放元素的容器。
 			
+			2. BlockingQueue 的操作方法:
+				阻塞队列提供了四组不同的方法用于插入、移除、检查元素：
+				方法\处理方式	抛出异常  	返回特殊值	  一直阻塞	         超时退出
+					插入方法	          add(e)	      offer(e)	      put(e)	           offer(e,time,unit)
+					移除方法	        remove()	   poll()	      take()            	poll(time,unit)
+					检查方法	       element()	   peek()	          -	                      -
+				1. 抛出异常：如果操作无法立即执行，会抛异常。当阻塞队列满时候，再往队列里插入元素，会抛出 IllegalStateException(“Queue full”)异常。当队列为空时，从队列里获取元素时会抛出 NoSuchElementException 异常 。
+				2. 返回特殊值：如果操作无法立即执行，会返回一个特殊值，通常是 true / false。
+				3. 一直阻塞：如果操作无法立即执行，则一直阻塞或者响应中断。
+				4. 超时退出：如果操作无法立即执行，该方法调用将会发生阻塞，直到能够执行，但等待时间不会超过给定值。返回一个特定值以告知该操作是否成功，通常是 true / false。
+					注意：
+				1. 不能往阻塞队列中插入 null，会抛出空指针异常。
+				2. 可以访问阻塞队列中的任意元素，调用 remove(o)可以将队列之中的特定对象移除，但并不高效，尽量避免使用。
+			3. BlockingQueue 的实现类
+					1. ArrayBlockingQueue
+						由数组结构组成的有界阻塞队列。内部结构是数组，具有数组的特性。
+						public ArrayBlockingQueue(int capacity, boolean fair){
+							 //..省略代码
+							}
+						可以初始化队列大小，一旦初始化将不能改变。构造方法中的 fair 表示控制对象的内部锁是否采用公平锁，默认是非公平锁。
+					2. LinkedBlockingQueue
+						由链表结构组成的有界阻塞队列。内部结构是链表，具有链表的特性。默认队列的大小是Integer.MAX_VALUE，也可以指定大小。此队列按照先进先出的原则对元素进行排序。
+					3. DelayQueue
+						该队列中的元素只有当其指定的延迟时间到了，才能够从队列中获取到该元素。注入其中的元素必须实现 java.util.concurrent.Delayed 接口。
+						DelayQueue 是一个没有大小限制的队列，因此往队列中插入数据的操作（生产者）永远不会被阻塞，而只有获取数据的操作（消费者）才会被阻塞。
+					4. PriorityBlockingQueue
+						基于优先级的无界阻塞队列（优先级的判断通过构造函数传入的 Compator 对象来决定），内部控制线程同步的锁采用的是非公平锁。	
+					5. SynchronousQueue
+					这个队列比较特殊，没有任何内部容量，甚至连一个队列的容量都没有。并且每个 put 必须等待一个 take，反之亦然。
+					需要区别容量为 1 的 ArrayBlockingQueue、LinkedBlockingQueue。
+					以下方法的返回值，可以帮助理解这个队列：
+
+						iterator() 永远返回空，因为里面没有东西
+						peek() 永远返回 null
+						put() 往 queue 放进去一个 element 以后就一直 wait 直到有其他 thread 进来把这个 element 取走。
+						offer() 往 queue 里放一个 element 后立即返回，如果碰巧这个 element 被另一个 thread 取走了，offer 方法返回 true，认为 offer 成功；否则返回 false。
+						take() 取出并且 remove 掉 queue 里的 element，取不到东西他会一直等。
+						poll() 取出并且 remove 掉 queue 里的 element，只有到碰巧另外一个线程正在往 queue 里 offer 数据或者 put 数据的时候，该方法才会取到东西。否则立即返回 null。
+						isEmpty() 永远返回 true
+						remove()&removeAll() 永远返回 false
+									*****注意
+					PriorityBlockingQueue不会阻塞数据生产者（因为队列是无界的），而只会在没有可消费的数据时阻塞数据的消费者。
+					因此使用的时候要特别注意，生产者生产数据的速度绝对不能快于消费者消费数据的速度，否则时间一长，会最终耗尽所有的可用堆内存空间。对于使用默认大小的LinkedBlockingQueue也是一样的。
+			4. CopyOnWrite容器
+					在聊 CopyOnWrite 容器之前我们先来谈谈什么是 CopyOnWrite 机制，CopyOnWrite 是计算机设计领域的一种优化策略，
+					也是一种在并发场景下常用的设计思想——写入时复制。
+					什么是写入时复制呢？
+					就是当有多个调用者同时去请求一个资源数据的时候，有一个调用者出于某些原因需要对当前的数据源进行修改，这个时候系统将会复制一个当前数据源的副本给调用者修改。
+					CopyOnWrite 容器即写时复制的容器，当我们往一个容器中添加元素的时候，不直接往容器中添加，而是将当前容器进行 copy，复制出来一个新的容器，然后向新容器中添加我们需要的元素，最后将原容器的引用指向新容器。
+					这样做的好处在于，我们可以在并发的场景下对容器进行"读操作"而不需要"加锁"，从而达到读写分离的目的。从 JDK 1.5 开始 Java 并发包里提供了两个使用 CopyOnWrite 机制实现的并发容器，
+					分别是 CopyOnWriteArrayList 和 CopyOnWriteArraySet（不常用）。
+																		小结
+			本文主要介绍了并发包中的三个重要的容器类:
+			1. Map: ConcurrentHashMap, ConcurrentSkipListMap(有序)
+				List: 难做到并发, 因为即使简单的读操作，比如 contains()，也需要再搜索的时候锁住整个 list。
+				并发Queue: ConcurrentLinkedQueue 和 ConcurrentLinkedDeque
+			2. 阻塞队列: ArrayBlockingQueue, LinkedBlockingQueue, DelayQueue, PriorityBlockingQueue, SynchronousQueue(大小为1)
+			3. CopyOnWrite 容器: CopyOnWriteArrayList, CopyOnWriteArraySet       ***"读操作"而不需要"加锁"
+			*********Map 用于存储键值对，阻塞队列用于生产者-消费者模型，而 CopyOnWrite 容器用于“读多写少”的并发场景。
+21. ConcurrentHashMap
+		线程安全的哈希表
+			ConcurrentHashMap 是线程安全的，支持完全并发的读取，并且有很多线程可以同时执行写入。在早期版本（例如 JDK 1.7）中，ConcurrentHashMap 使用分段锁技术。
+			整个哈希表被分成一些段（Segment），每个段独立加锁。这样，在不同段上的操作可以并发进行。从 JDK 1.8 开始，ConcurrentHashMap 的内部实现有了很大的变化。
+			它放弃了分段锁技术，转而采用了更先进的并发控制策略，如 CAS 操作和红黑树等，进一步提高了并发性能。
+			由于并发性质，ConcurrentHashMap 的大小计算可能不是精确的，但通常足够接近真实值。
+22. ConcurrentLinkedQueue
+		ConcurrentLinkedQueue 是 java.util.concurrent（JUC） 包下的一个线程安全的队列实现。基于非阻塞算法（Michael-Scott 非阻塞算法的一种变体），
+		这意味着 ConcurrentLinkedQueue 不再使用传统的锁机制来保护数据安全，而是依靠底层原子的操作（如 CAS）来实现。
+		ConcurrentLinkedQueue 是一种先进先出（FIFO，First-In-First-Out）的队列，它是一个基于链接节点的无界线程安全队列。该队列的元素遵循先进先出的原则。
+		头是最先加入的，尾是最近加入的。该队列不允许 null 元素。
+		ConcurrentLinkedQueue 采用了 HOPS 的设计，即 head 和 tail 是延迟更新的，这种设计的主要目的是减小多线程环境下的争用，并提高性能。
+		ConcurrentLinkedQueue 的 offer 方法用于在队列尾部插入一个元素。如果成功添加元素，则返回 true。
+		ConcurrentLinkedQueue 的 poll 方法用于检索并删除队列的头部元素。如果队列为空，则返回 null。
+		ConcurrentLinkedQueue 的 isEmpty 方法用于检索队列是否为空。
+		ConcurrentLinkedQueue 的 size 方法用于返回队列的大小。
+23. BlockingQueue(接口)
+		BlockingQueue 是 Java 中的一个接口，它代表了一个线程安全的队列，不仅可以由多个线程并发访问，还添加了等待/通知机制，
+		以便在队列为空时阻塞获取元素的线程，直到队列变得可用，或者在队列满时阻塞插入元素的线程，直到队列变得可用。
+		最常用的"生产者-消费者"问题中，队列通常被视作线程间的数据容器，生产者将“生产”出来的数据放入数据容器，消费者从“数据容器”中获取数据，
+		这样，生产者线程和消费者线程就解耦了，各自只需要专注自己的业务即可。
+		阻塞队列（BlockingQueue）被广泛用于“生产者-消费者”问题中，其原因是 BlockingQueue 提供了可阻塞的插入和移除方法。
+		当队列容器已满，生产者线程会被阻塞，直到队列未满；当队列容器为空时，消费者线程会被阻塞，直至队列非空时为止。
+		1) ArrayBolckingQueue
+			BlockingQueue 接口的实现类有 ArrayBlockingQueue、DelayQueue、LinkedBlockingDeque、LinkedBlockingQueue、LinkedTransferQueue、PriorityBlockingQueue、SynchronousQueue 等，我们先从 ArrayBlockingQueue 说起。
+			ArrayBlockingQueue 它是一个基于数组的有界阻塞队列：
+			有界：ArrayBlockingQueue 的大小是在构造时就确定了，并且在之后不能更改。这个界限提供了流量控制，有助于资源的合理使用。
+			FIFO：队列操作符合先进先出的原则。
+			当队列容量满时，尝试将元素放入队列将导致阻塞；尝试从一个空的队列取出元素也会阻塞。
+			需要注意的是，ArrayBlockingQueue 并不能保证绝对的公平，所谓公平是指严格按照线程等待的绝对时间顺序，即最先等待的线程能够最先访问到 ArrayBlockingQueue。
+			这是因为还有其他系统级别的因素，如线程调度，可能会影响到实际的执行顺序。如果需要公平的 ArrayBlockingQueue，可在声明的时候设置公平标志为 true:
+					private static ArrayBlockingQueue<Integer> blockingQueue = new ArrayBlockingQueue<Integer>(10, true);
+		2) LinkedBlockingQueue
+24.  CopyOnWriteArrayList
+		学过 ArrayList 的小伙伴应该记得，ArrayList 是一个线程不安全的容器，如果在多线程环境下使用，需要手动加锁，或者使用 Collections.synchronizedList() 方法将其转换为线程安全的容器。
+		否则，将会出现 ConcurrentModificationException 异常。
+		于是，Doug Lea 大师为我们提供了一个并发版本的 ArrayList——CopyOnWriteArrayList。
+		CopyOnWriteArrayList 是线程安全的，可以在多线程环境下使用。CopyOnWriteArrayList 遵循写时复制的原则，每当对列表进行修改（例如添加、删除或更改元素）时，
+		都会创建列表的一个新副本，这个新副本会替换旧的列表，而对旧列表的所有读取操作仍然可以继续。
+		由于在修改时创建了新的副本，所以读取操作不需要锁定。这使得在多读取者和少写入者的情况下读取操作非常高效。当然，由于每次写操作都会创建一个新的数组副本，所以会增加存储和时间的开销。如果写操作非常频繁，性能会受到影响。
+		
+		1) 什么是CopyOnWrite
 ************************************************************************************************************************************************************************************************************
 
 
@@ -1451,24 +1669,31 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 	
 	1. DAO（Data  Access Object）数据访问对象
 				一般在业务逻辑层面对数据库的访问是使用，一般只能进行sql操作。
+	2. PO（Persistent Object）持久化对象/DO（Domain Object）领域对象
+			   ·数据库表中的数据在Java对象中的显示状态，最理想的解释就是PO就是数据库中的一条记录。
 				xxxDAO，xxx为实体类名（entity实体类）。
-	2. DTO（Data Transfer Object）数据传输对象
+	3. BO（Business Object）业务对象
+				一般用在包含业务功能模块的具体实例上。
+				比如我写了一个controller，一个service，一个dao，一个util，等等这一系列实例组合后才能实现一些功能，这些一系列实例组合为一个组件，这个组件就是BO。	
+	4. DTO（Data Transfer Object）数据传输对象
+		RPC Controller
 				一般在前端（web）对控制层（controller）进行数据传输时使用，说白了就是前端向后端提交数据。
 				xxxDTO，xxx为业务领域相关的名称。
-	3. DO（Domain Object）领域对象
-			   一般在业务逻辑层对数据库的访问时使用接收数据使用。
-			   xxxDO，xxx为数据库表名。
 			   另外，DO和Entity概念上浅显相似，它们在实际应用中是一种东西，总的来说，DO是 Entity的一种。
-	4.VO（View Object）视图模型
+	5.VO（View Object）视图模型
 			   一般用在业务逻辑层，对前端的视觉模型效果控制的展示上，说白了就是后端向前端传递数据。
 			   xxxVO，xxx为网页名称。
 			  自定义的，再封装的，多个表的的属性或字段的集合。
-	5. BO（Business Object）业务对象
-				一般用在包含业务功能模块的具体实例上。
-				比如我写了一个controller，一个service，一个dao，一个util，等等这一系列实例组合后才能实现一些功能，这些一系列实例组合为一个组件，这个组件就是BO。
-	6. PO（Persistent Object）持久化对象
-			   ·数据库表中的数据在Java对象中的显示状态，最理想的解释就是PO就是数据库中的一条记录。
-			   ·例如我们有一条数据，现在有一个简单类而且是已经被赋予了这条数据的实例，那么这条数据在这个简单类的存在就是PO，不管这个是BO,DO，还是其它，PO只是数据持久化的              状态。
+********																						
+			   VO与DTO区别【VO：后端给前端；DTO：前端给后端】
+	6. DO（Domain Object）领域对象
+				DO（ Data Object）这个等同于上面的PO
+				另一个是在DDD（Domain-Driven Design）领域驱动设计中
+				DO（Domain Object）这个等同于上面的BO										
+			   一般在业务逻辑层对数据库的访问时使用接收数据使用。
+			   xxxDO，xxx为数据库表名。
+			   ·例如我们有一条数据，现在有一个简单类而且是已经被赋予了这条数据的实例，那么这条数据在这个简单类的存在就是PO，不管这个是BO,DO，还是其它，PO只是数据持久化的状态。
+			   
 	7. Entity（应用程序中的一个概念）实体
 				Entity是一个未被持久化的对象，它是一个类，从现实中抽象到代码的一个类。
 	8. POJO（Plain Ordinary Java Object）
@@ -1740,12 +1965,12 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
 4. Spring
-1) filter和interceptor的区别
+1. filter和interceptor的区别
 	在Java的Web开发中，特别是当使用Servlet和Spring等框架时，
 	Filter 和 Interceptor 都是用于处理请求和响应的重要组件。尽管它们在某种程度上具有相似的功能，
 	但它们在用途、执行时机和生命周期等方面存在一些关键的区别。
 
-	1. Filter（过滤器）
+	1). Filter（过滤器）
 		Filter 是Java Servlet规范的一部分，用于在请求到达Servlet之前或响应离开Servlet之后执行某些操作。Filter 可以在web.xml中配置，也可以通过注解在Servlet 3.0及以上版本中使用。
 		主要功能：
 		对请求进行预处理，例如设置请求字符集、记录日志等。
@@ -1756,7 +1981,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		特点：
 		与具体的Servlet或Controller方法无关，是全局的。
 		依赖于Servlet容器，例如Tomcat。
-	2. Interceptor（拦截器）
+	2). Interceptor（拦截器）
 		Interceptor 是Spring框架提供的一个特性，用于在Spring MVC的控制器方法执行前后执行某些操作。它通常用于权限验证、日志记录、事务管理等。
 		主要功能：
 		在控制器方法执行前执行预处理逻辑。
@@ -1775,7 +2000,10 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		功能：两者在功能上有所重叠，但Interceptor通常用于Spring MVC的特定场景，如事务管理、权限验证等，而Filter则更多地用于通用的预处理和后处理操作。
 		在实际应用中，可以根据具体需求选择使用Filter还是Interceptor。如果需要在整个应用范围内对请求和响应进行预处理和后处理，那么Filter是一个好选择。
 		如果需要在Spring MVC的控制器方法执行前后执行特定逻辑，那么Interceptor可能更合适。
-		
+2. Spring、SpringMVC、SpringBoot的区别
+			1. Spring是一个开源的Java应用框架，它提供了一套全面的编程和配置模型
+			2. Spring MVC是Spring框架中的一个模块，它是基于Java的实现MVC设计模式的请求驱动类型的轻量级Web框架。
+			3. Spring Boot是一个用于快速构建现代应用程序的框架，它遵循“约定优于配置”的原则，通过自动化配置和默认设置，减少了繁琐的配置代码，从而简化了开发者的配置工作。
 3. 数据库
 	1) 存储过程的优点
 		 A、 存储过程允许标准组件式编程
