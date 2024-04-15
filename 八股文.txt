@@ -544,7 +544,7 @@ AIO 方式适用于连接数目多且连接比较长（重操作）的架构，�
 	1) ACSII: 128个,  其中33 个字符无法显示在一般的设备上，需要用特殊的设备才能显示。
 	2) Unicode 是一个很大的集合，现在的规模可以容纳 100 多万个符号
 	3) UTF-8, 存储优化
-	4) GB2312, 对于中文的优化, GBK(扩展)
+	4) GB2312, 对于中文的优化, GBK(扩展), GB/国标
 	5) 编码转换问题导致乱码, 锟斤拷，第一时间想到 UTF-8 和 GBK 的转换问题准没错
 	6) 以下是一些避免乱码的实践：
 			1. 使用统一的字符编码，如 UTF-8。它包含了所有 Unicode 字符，并且广泛支持。确保在所有平台和系统上使用相同的编码。
@@ -649,6 +649,7 @@ AIO 方式适用于连接数目多且连接比较长（重操作）的架构，�
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+业务需求、性能优化需要、可简化任务调度、并行程序在多核心CPU有优势。
 ****************************************************************************************************************
 1. 创建线程的三种方式
 1) 继承Thread类
@@ -1465,13 +1466,13 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			2. 阻塞队列: ArrayBlockingQueue, LinkedBlockingQueue, DelayQueue, PriorityBlockingQueue, SynchronousQueue(大小为1)
 			3. CopyOnWrite 容器: CopyOnWriteArrayList, CopyOnWriteArraySet       ***"读操作"而不需要"加锁"
 			*********Map 用于存储键值对，阻塞队列用于生产者-消费者模型，而 CopyOnWrite 容器用于“读多写少”的并发场景。
-21. ConcurrentHashMap
+21. ConcurrentHashMap/吊打Java并发面试官之ConcurrentHashMap（线程安全的哈希表）
 		线程安全的哈希表
 			ConcurrentHashMap 是线程安全的，支持完全并发的读取，并且有很多线程可以同时执行写入。在早期版本（例如 JDK 1.7）中，ConcurrentHashMap 使用分段锁技术。
 			整个哈希表被分成一些段（Segment），每个段独立加锁。这样，在不同段上的操作可以并发进行。从 JDK 1.8 开始，ConcurrentHashMap 的内部实现有了很大的变化。
 			它放弃了分段锁技术，转而采用了更先进的并发控制策略，如 CAS 操作和红黑树等，进一步提高了并发性能。
 			由于并发性质，ConcurrentHashMap 的大小计算可能不是精确的，但通常足够接近真实值。
-22. ConcurrentLinkedQueue
+22. ConcurrentLinkedQueue/吊打Java并发面试官之线程安全的队列实现ConcurrentLinkedQueue
 		ConcurrentLinkedQueue 是 java.util.concurrent（JUC） 包下的一个线程安全的队列实现。基于非阻塞算法（Michael-Scott 非阻塞算法的一种变体），
 		这意味着 ConcurrentLinkedQueue 不再使用传统的锁机制来保护数据安全，而是依靠底层原子的操作（如 CAS）来实现。
 		ConcurrentLinkedQueue 是一种先进先出（FIFO，First-In-First-Out）的队列，它是一个基于链接节点的无界线程安全队列。该队列的元素遵循先进先出的原则。
@@ -1481,7 +1482,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		ConcurrentLinkedQueue 的 poll 方法用于检索并删除队列的头部元素。如果队列为空，则返回 null。
 		ConcurrentLinkedQueue 的 isEmpty 方法用于检索队列是否为空。
 		ConcurrentLinkedQueue 的 size 方法用于返回队列的大小。
-23. BlockingQueue(接口)
+23. BlockingQueue(接口)/吊打Java并发面试官之阻塞队列BlockingQueue
 		BlockingQueue 是 Java 中的一个接口，它代表了一个线程安全的队列，不仅可以由多个线程并发访问，还添加了等待/通知机制，
 		以便在队列为空时阻塞获取元素的线程，直到队列变得可用，或者在队列满时阻塞插入元素的线程，直到队列变得可用。
 		最常用的"生产者-消费者"问题中，队列通常被视作线程间的数据容器，生产者将“生产”出来的数据放入数据容器，消费者从“数据容器”中获取数据，
@@ -1498,7 +1499,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			这是因为还有其他系统级别的因素，如线程调度，可能会影响到实际的执行顺序。如果需要公平的 ArrayBlockingQueue，可在声明的时候设置公平标志为 true:
 					private static ArrayBlockingQueue<Integer> blockingQueue = new ArrayBlockingQueue<Integer>(10, true);
 		2) LinkedBlockingQueue
-24.  CopyOnWriteArrayList
+24.  CopyOnWriteArrayList/吊打Java并发面试官之CopyOnWriteArrayList
 		学过 ArrayList 的小伙伴应该记得，ArrayList 是一个线程不安全的容器，如果在多线程环境下使用，需要手动加锁，或者使用 Collections.synchronizedList() 方法将其转换为线程安全的容器。
 		否则，将会出现 ConcurrentModificationException 异常。
 		于是，Doug Lea 大师为我们提供了一个并发版本的 ArrayList——CopyOnWriteArrayList。
@@ -1507,6 +1508,328 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		由于在修改时创建了新的副本，所以读取操作不需要锁定。这使得在多读取者和少写入者的情况下读取操作非常高效。当然，由于每次写操作都会创建一个新的数组副本，所以会增加存储和时间的开销。如果写操作非常频繁，性能会受到影响。
 		
 		1) 什么是CopyOnWrite
+				读写锁:
+			读写锁 ReentrantReadWriteLock: 读写锁是通过读写分离的思想来实现的，即读写锁将读写操作分别加锁，从而实现读写操作的并发执行。
+			读写锁也存在一些问题，比如说在写锁执行后，读线程会被阻塞，直到写锁被释放后读线程才有机会获取到锁从而读到最新的数据，
+			站在读线程的角度来看，读线程在任何时候都能获取到最新的数据，满足数据实时性。
+				CopyOnWriteList:
+			CopyOnWriteArrayList 是通过 Copy-On-Write(COW)，即写时复制的思想来通过延时更新的策略实现数据的最终一致性，并且能够保证读线程间不阻塞。
+			当然，这要牺牲数据的实时性。
+			
+			通俗的讲，CopyOnWrite 就是当我们往一个容器添加元素的时候，不直接往容器中添加，而是先复制出一个新的容器，然后在新的容器里添加元素，
+			添加完之后，再将原容器的引用指向新的容器。多个线程在读的时候，不需要加锁，因为当前容器不会添加任何元素。
+		2) CopyOnWriteArrayList 的缺点
+			CopyOnWrite 容器有很多优点，但是同时也存在两个问题，即内存占用问题和数据一致性问题。所以在开发的时候需要特别注意。
+			内存占用问题：因为 CopyOnWrite 的写时复制机制，在进行写操作的时候，内存里会同时有两个对象，旧的对象和新写入的对象，分析 add 方法的时候大家都看到了。
+			如果这些对象占用的内存比较大，比如说 200M 左右，那么再写入 100M 数据进去，内存就会占用 600M，那么这时候就会造成频繁的 minor GC 和 major GC。
+			数据一致性问题：CopyOnWrite 容器只能保证数据的最终一致性，不能保证数据的实时一致性。
+			所以如果你希望写入的的数据，马上能读到，请不要使用 CopyOnWrite 容器，最好通过 ReentrantReadWriteLock 自定义一个的列表。	
+		3) 我们来比较一下 CopyOnWrite 和读写锁。
+				相同点：
+			两者都是通过读写分离的思想来实现的；
+			读线程间是互不阻塞的
+				不同点：
+			为了实现数据实时性，在写锁被获取后，读线程会阻塞；或者当读锁被获取后，写线程会阻塞，从而解决“脏读”的问题。
+			而 CopyOnWrite 对数据的更新是写时复制的，因此读线程是延时感知的，单不会存在阻塞的情况。
+********************并发事务所产生的3个问题
+									1. 脏读: 读到了其他事务未提交的数据
+									2. 不可重复读: 在一个事务内，最开始读到的数据和事务结束前的任意时刻读到的同一批数据出现不一致的情况。
+									3. 幻读，并不是说两次读取获取的结果集不同，幻读侧重的方面是某一次的 select 操作得到的结果所表征的数据状态无法支撑后续的业务操作。
+										更为具体一些：select 某记录是否存在，不存在，准备插入此记录，但执行 insert 时发现此记录已存在，无法插入，此时就发生了幻读。
+									不可重复读侧重表达 读-读，幻读则是说 读-写，用写来证实读的是鬼影。
+********************事务的隔离级别
+										上述所说的"脏读"，“不可重复读”，"幻读"这些问题，其实就是数据库读一致性问题，必须由数据库提供的事务隔离机制来进行解决。
+									1. 读未提交: 没有隔离效果
+									2. 读已提交: 解决脏读, Oracle默认隔离级别
+									3. 可重复读: 解决脏读, 不可重复读. MySQL默认事务隔离级别.
+									4. 串行化: 解决脏读, 不可重复读, 幻读. 读的时候加共享锁, 其他事务可以并发读不能写. 写的时候加上排他锁/独占锁/写锁, 其他事务不能并发写也不能并发读.
+			小结:
+				CopyOnWriteArrayList 是一个线程安全的变体，它是 Java 的 ArrayList 类的并发版本。这个类的线程安全是通过一个简单但强大的想法实现的：每当列表修改时，就创建列表的一个新副本。
+				CopyOnWriteArrayList 适用于读操作远远大于写操作的场景，比如说缓存。因为 CopyOnWriteArrayList 采用写时复制的思想，所以写操作的性能较低，因此不适合写操作频繁的场景。
+				CopyOnWriteArrayList 也存在一些缺点，比如说内存占用问题和数据一致性问题，所以在开发的时候需要特别注意。
+25. ThreadLocal/吊打Java并发面试官之ThreadLocal
+			是 Java 中提供的一种用于实现线程局部变量的工具类。它允许每个线程都拥有自己的独立副本，从而实现线程隔离，用于解决多线程中共享对象的线程安全问题。
+			通常，我们会使用 synchronzed 关键字 或者 lock 来控制线程对临界区资源的同步顺序，但这种加锁的方式会让未获取到锁的线程进行阻塞，很显然，这种方式的时间效率不会特别高。
+			线程安全问题的核心在于多个线程会对同一个临界区的共享资源进行访问，那如果每个线程都拥有自己的“共享资源”，各用各的，互不影响，这样就不会出现线程安全的问题了，对吧？
+			事实上，这就是一种“空间换时间”的思想，每个线程拥有自己的“共享资源”，虽然内存占用变大了，但由于不需要同步，也就减少了线程可能存在的阻塞问题，从而提高时间上的效率。
+			不过，ThreadLocal 并不在 java.util.concurrent 并发包下，而是在 java.lang 包下，但我更倾向于把它当作是一种并发容器。
+			顾名思义，
+			ThreadLocal 就是线程的“本地变量”，即每个线程都拥有该变量的一个副本，达到人手一份的目的，这样就可以避免共享资源的竞争。
+			***JUC包: java.util.concurrent, java.util.concurrent.locks, java.util.concurrent.atomic, 一些并发容器.
+			1) ThreadLocal的使用场景
+				1. 用于保存用户登录信息，这样在同一个线程中的任何地方都可以获取到登录信息。
+				2. 用于保存数据库连接、Session 对象等，这样在同一个线程中的任何地方都可以获取到数据库连接、Session 对象等。
+				3. 用于保存事务上下文，这样在同一个线程中的任何地方都可以获取到事务上下文。
+				4. 用于保存线程中的变量，这样在同一个线程中的任何地方都可以获取到线程中的变量。
+			示例定义了一个UserAuthenticationService类，该类使用ThreadLocal来保存与当前线程关联的用户登录信息。
+			假设用户已经通过身份验证，将用户对象存储在currentUser ThreadLocal变量中。
+			getCurrentUser方法用于检索与当前线程关联的用户信息。由于使用了ThreadLocal，因此不同的线程可以同时登录不同的用户，而不会相互干扰。
+						小结:
+	ThreadLocal 是一个非常有用的工具类，它可以用于保存线程中的变量，这样在同一个线程中的任何地方都可以获取到线程中的变量。但是，ThreadLocal 也是一个非常容易被误用的工具类，如果没有使用好，就可能会造成内存泄漏的问题。
+	ThreadLocalMap 是 ThreadLocal 的核心，它是一个以 ThreadLocal 实例为 key，任意对象为 value 的哈希表。ThreadLocalMap 使用开放地址法来处理哈希冲突，它的初始容量为 16，加载因子为 2/3，扩容时会将容量扩大为原来的两倍。
+	ThreadLocal内存泄露:
+		1.ThreadLocal变量没有被明确的移除。
+		2.ThreadLocal变量一直存在于ThreadLocalMap中。
+	解决:
+		1.使用ThreadLocal.remove()方法
+		2.使用不可变对象
+		3.使用弱引用
+		4.使用线程池
+26. 线程池
+	一、什么是线程池
+		线程池其实是一种池化的技术实现，池化技术的核心思想就是实现资源的复用，避免资源的重复创建和销毁带来的性能开销。线程池可以管理一堆线程，让线程执行完任务之后不进行销毁，而是继续去处理其它线程已经提交的任务。
+		使用线程池的好处
+		1. 降低资源消耗。通过重复利用已创建的线程降低线程创建和销毁造成的消耗。
+		2. 提高响应速度。当任务到达时，任务可以不需要等到线程创建就能立即执行。
+		3. 提高线程的可管理性。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一的分配，调优和监控。
+	二、线程池的构造
+		Java 主要是通过构建 ThreadPoolExecutor 来创建线程池的。接下来我们看一下线程池是如何构造出来的
+		1. corePoolSize：线程池中用来工作的核心线程数量。
+		2. maximumPoolSize：最大线程数，线程池允许创建的最大线程数。
+		3. keepAliveTime：超出 corePoolSize 后创建的线程存活时间或者是所有线程最大存活时间，取决于配置。
+		4. unit：keepAliveTime 的时间单位。
+		5. workQueue：任务队列，是一个阻塞队列，当线程数达到核心线程数后，会将任务存储在阻塞队列中。
+		6. threadFactory ：线程池内部创建线程所用的工厂。
+		7. handler：拒绝策略；当队列已满并且线程数量达到最大线程数量时，会调用该方法处理任务。
+		线程池的构造其实很简单，就是传入一堆参数，然后进行简单的赋值操作。
+
+	三、线程池的运行原理
+		此时来了一个任务:
+			1. 线程数 < corePoolSize ----> ThreadFactory 创建一个线程来执行这个任务
+			2. 线程数 >= corePoolSize ----> 任务放入阻塞队列
+			3. 阻塞队列满了, 任务放入阻塞队列失败
+			判断 线程数 < maximumPoolSize ----> 创建非核心线程来执行提交的任务
+			*****从这可以看出，先提交的任务不一定先执行。
+			4. 线程数 > maximumPoolSize ----> 执行拒绝策略
+				RejectedExecutionHandler 对象，来处理这个任务。
+				
+			JDK 自带的 RejectedExecutionHandler 实现有 4 种: 
+				1. AbortPolicy：丢弃任务，抛出运行时异常
+				2. CallerRunsPolicy：由提交任务的线程来执行任务
+				3. DiscardPolicy：丢弃这个任务，但是不抛异常
+				4. DiscardOldestPolicy：从队列中剔除最先进入队列的任务，然后再次提交任务
+			线程池创建的时候，如果不指定拒绝策略就默认是 AbortPolicy 策略。
+	四、线程池中线程实现复用的原理
+		线程在线程池内部其实被封装成了一个 Worker 对象, Worker 继承了 AQS，也就是具有一定锁的特性。
+		runWorker 内部使用了 while 死循环，当第一个任务执行完之后，会不断地通过 getTask 方法获取任务，只要能获取到任务，就会调用 run 方法继续执行任务，这就是线程能够复用的主要原因。
+		但是如果从 getTask 获取不到方法的话，就会调用 finally 中的 processWorkerExit 方法，将线程退出。
+		这里有个一个细节就是，因为 Worker 继承了 AQS，每次在执行任务之前都会调用 Worker 的 lock 方法，执行完任务之后，会调用 unlock 方法，这样做的目的就可以通过 Woker 的加锁状态判断出当前线程是否正在执行任务。
+		如果想知道线程是否正在执行任务，只需要调用 Woker 的 tryLock 方法，根据是否加锁成功就能判断，加锁成功说明当前线程没有加锁，也就没有执行任务了，在调用 shutdown 方法关闭线程池的时候，
+		就时用这种方式来判断线程有没有在执行任务，如果没有的话，会尝试打断没有执行任务的线程。
+	五、线程是如何获取任务以及如何实现超时的
+		线程达到了 keepAliveTime 还没有获取到任务，就会返回 null，一旦 getTask 方法返回 null，线程就会退出。
+	六、线程池的 5 种状态
+		1. private static final int RUNNING    = -1 << COUNT_BITS;
+		2. private static final int SHUTDOWN   =  0 << COUNT_BITS;
+		3. private static final int STOP       =  1 << COUNT_BITS;
+		4. private static final int TIDYING    =  2 << COUNT_BITS;
+		5. private static final int TERMINATED =  3 << COUNT_BITS;
+	七、线程池的关闭
+		线程池提供了 shutdown 和 shutdownNow 两个方法来关闭线程池。
+		shutdown: 只想玩队列中任务
+		shutdownNow: 所有线程执行结束
+		线程全部执行完毕了，池中线程为0，马上会进入终结状态
+	八、线程池的监控
+		在项目中使用线程池的时候，一般需要对线程池进行监控，方便出问题的时候快速定位。线程池本身提供了一些方法来获取线程池的运行状态。
+		getCompletedTaskCount：已经执行完成的任务数量
+		getLargestPoolSize：线程池里曾经创建过的最大的线程数量。这个主要是用来判断线程是否满过。
+		getActiveCount：获取正在执行任务的线程数据
+		getPoolSize：获取当前线程池中线程数量的大小
+		除了线程池提供的上述已经实现的方法，同时线程池也预留了很多扩展方法。比如在 runWorker 方法里面，执行任务之前会回调 beforeExecute 方法，
+		执行任务之后会回调 afterExecute 方法，而这些方法默认都是空实现，可以自己继承 ThreadPoolExecutor 来重写这些方法，实现自己想要的功能。
+	九、线程池的使用场景
+		1. 模拟一个简单的Web服务器，接受请求并使用线程池进行处理。
+			private static final int NTHREADS = 100;
+			private static final ExecutorService exec = Executors.newFixedThreadPool(NTHREADS);
+			while(tur){
+			Runnable request = new Runnable() {
+					public void run() {
+					}
+				};
+			exec.execute(request);
+			}
+		2. 使用线程池进行并行的数值计算。
+			private static final int NTHREADS = 4;
+			private static final ExecutorService exec = Executors.newFixedThreadPool(NTHREADS);
+			Callable<Double> task = new Callable<Double>() {
+				@Override
+				public Double call() {
+					// 这里模拟一些数值计算
+					return Math.random() * 100;
+				}
+			};
+			List<Future<Double>> results = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				results.add(exec.submit(task));
+			}
+
+			for (Future<Double> result : results) {
+				try {
+					System.out.println(result.get());
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			exec.shutdown();
+		3. 异步任务处理
+			private static final ExecutorService exec = Executors.newCachedThreadPool();
+			exec.execute(() -> {
+            // 执行某些异步任务
+            System.out.println("Async task started");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Async task completed");
+        });
+
+        System.out.println("Main thread continues to execute other operations.");
+        exec.shutdown();
+******************************************************
+					1. Executor接口
+					2. ExecutorService是Java中对线程池定义的一个接口，它java.util.concurrent包中，在这个接口中定义了和后台任务执行相关的方法
+						ExecutorService继承了Executor接口
+						区别:
+						1. Executor接口是Java中的一个简单接口，它只定义了一个方法execute(Runnable command)，用于执行传入的Runnable任务。这意味着Executor接口只负责提交任务，而不关注任务的执行结果。
+						2. ExecutorService接口是Executor接口的子接口，继承了Executor的功能，并进行了扩展。它提供了submit()方法，该方法不仅可以接受Runnable对象，还可以接受Callable对象。
+						Callable对象与Runnable类似，但能够返回执行结果或抛出异常。因此，ExecutorService不仅负责提交任务，还可以通过返回的Future对象获取任务的执行结果。
+					3. Executors: 	
+						Executors 是 Java 并发包 java.util.concurrent 中的一个非常有用的工厂类，它提供了一系列静态方法，
+						用于创建并返回各种不同类型的线程池执行器（ExecutorService）和计划任务执行器（ScheduledExecutorService）。
+						这些线程池执行器和计划任务执行器都是预先配置好的，可以根据需要执行提交的任务。
+						直接使用这些默认配置的线程池可能会导致资源泄露或其他问题。
+						例如，newFixedThreadPool 和 newCachedThreadPool 方法创建的线程池在默认情况下允许无限制地创建线程，这可能导致 OutOfMemoryError。
+							1. newCachedThreadPool 创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。核心线程数无限大
+							2. newFixedThreadPool 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。队列的容量默认无限大
+							3. newScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。
+							
+							4. newSingleThreadExecutor 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
+					4. AbstractExecutorService
+						实现了ExecutorService接口
+						AbstractExecutorService是一个抽象类，因此它不能直接实例化。在实际使用中，通常是通过继承它的子类，如ThreadPoolExecutor或ScheduledThreadPoolExecutor，来创建和使用线程池。
+					5. ScheduledExecutorService
+						ScheduledExecutorService 是 Java 并发包 java.util.concurrent 中的一个接口，它扩展了 ExecutorService 接口，主要用于在给定的延迟后运行命令，或者定期地执行命令。
+						ScheduledExecutorService 提供了一种灵活的方式来安排任务的执行时间。
+					6. ThreadPoolExecutor
+						简单地并行执行任务，不关心任务的执行时间，那么ThreadPoolExecutor是一个合适的选择。
+					7. ScheduledThreadPoolExecutor
+						如果你需要按照特定的时间间隔或延迟执行任务，比如定时检查系统状态、定期发送邮件等，那么ScheduledThreadPoolExecutor则更为适用。
+							ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
+							ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+							// 初始延迟0秒，之后每次任务执行完后等待2秒再执行  
+							executor.scheduleWithFixedDelay(fixedDelayTask, 0, 2, TimeUnit.SECONDS);
+							// 初始延迟0秒，之后每隔1秒执行一次  
+							executor.scheduleAtFixedRate(fixedRateTask, 0, 1, TimeUnit.SECONDS);
+							// 在5秒后执行一次性任务  
+							executor.schedule(oneTimeTask, 5, TimeUnit.SECONDS);
+******************************************************
+十、Executors 构建线程池以及问题分析
+		虽然 JDK 提供了快速创建线程池的方法，但其实不推荐使用 Executors 来创建线程池，因为从上面构造线程池的代码可以看出，
+		newFixedThreadPool 线程池由于使用了 LinkedBlockingQueue，队列的容量默认无限大，实际使用中出现任务过多时会导致内存溢出；
+		newCachedThreadPool 线程池由于核心线程数无限大，当任务过多的时候会导致创建大量的线程，可能机器负载过高导致服务宕机。
+十一、实际项目中如何合理的自定义线程池
+	通过 Executors 这个工具类来创建的线程池其实都无法满足实际的使用场景，那么在实际的项目中，到底该如何构造线程池呢，该如何合理的设置参数？
+	1. 线程数
+	CPU 密集型：指的是任务主要使用来进行大量的计算，没有什么导致线程阻塞。一般这种场景的线程数设置为 
+							CPU 核心数+1。
+	IO 密集型：当执行任务需要大量的 io，比如磁盘 io，网络 io，可能会存在大量的阻塞，所以在 IO 密集型任务中使用多线程可以大大地加速任务的处理。一般线程数设置为 
+						2*CPU 核心数
+				Java 中用来获取 CPU 核心数的方法是：Runtime.getRuntime().availableProcessors();
+	2. 线程工厂
+		一般建议自定义线程工厂，构建线程的时候设置线程的名称，这样在查日志的时候就方便知道是哪个线程执行的代码。
+	3. 有界队列
+		一般需要设置有界队列的大小，比如 LinkedBlockingQueue 在构造的时候可以传入参数来限制队列中任务数据的大小，这样就不会因为无限往队列中扔任务导致系统的 oom。
+	例子:
+		1. Web服务器通常需要处理I/O操作，比如网络I/O，因此它们被视为I/O密集型任务。因此，我们将线程数设置为2 * CPU核心数。
+
+		public class SimpleWebServer {
+			private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+			private static final int CORE_POOL_SIZE = 2 * CPU_COUNT;
+			private static final int MAX_POOL_SIZE = 2 * CPU_COUNT + 1;
+
+			private static final ThreadPoolExecutor exec = new ThreadPoolExecutor(
+					CORE_POOL_SIZE,                                       // 核心线程数
+					MAX_POOL_SIZE,                                        // 最大线程数
+					60L,						                                          // 超出核心线程数的线程最大存活时间
+					TimeUnit.SECONDS,                                  //  最大存活时间的单位
+					new LinkedBlockingQueue<>(1000)     //  存放任务的阻塞队列
+			);
+
+			public static void main(String[] args) {
+				while (true) {
+					Runnable request = () -> System.out.println("Request handled by " + Thread.currentThread().getName());
+
+					exec.execute(request);
+				}
+			}
+		}
+	2. 并行计算
+	并行计算任务主要用于计算，没有I/O阻塞，所以它们是CPU密集型的。线程数设置为CPU核心数 + 1。
+		public class ParallelCalculation {
+			private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+			private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+			private static final int MAX_POOL_SIZE = CPU_COUNT * 2;
+
+			private static final ThreadPoolExecutor exec = new ThreadPoolExecutor(
+					CORE_POOL_SIZE,                                       // 核心线程数
+					MAX_POOL_SIZE,                                        // 最大线程数
+					10L,						                                          // 超出核心线程数的线程最大存活时间
+					TimeUnit.SECONDS,                                  //  最大存活时间的单位
+					new LinkedBlockingQueue<>(1000)     //  存放任务的阻塞队列
+			);
+
+			public static void main(String[] args) {
+				Callable<Double> task = () -> Math.random() * 100;
+
+				List<Future<Double>> results = new ArrayList<>();
+				for (int i = 0; i < 10; i++) {
+					results.add(exec.submit(task));
+				}
+
+				for (Future<Double> result : results) {
+					try {
+						System.out.println(result.get());
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}
+				}
+
+				exec.shutdown();
+			}
+		}
+		3. MyThreadFactory implements ThreadFactory
+											在调用ThreadPoolExecutor时，我们也可以不传递ThreadFactory，内部会默认创建一个ThreadFactory的实例
+											DefaultThreadFactory 无参构造函数生成了线程名称前缀，在创建线程实例时，拼接该线程名称
+											可以自定义ThreadFactory
+											既然可以不指定ThreadFactory，为何要自定义呢？
+											最重要的一个作用就是设置线程名称，多线程调试起来本来就费劲，如果没有标识符，那就更难了。所以这个功能还是很重要的，并且也是编码规范中推荐的。
+		4. RejectedExecutionHandler handler
+			1. AbortPolicy:  丢弃任务并抛出RejectedExecutionException异常。
+			2. DiscardPolicy：也是丢弃任务，但是不抛出异常。
+			3. DiscardOldestPolicy：丢弃队列最前面的任务，然后重新尝试执行任务（重复此过程）
+			4. CallerRunsPolicy：只要线程池不关闭，该策略直接在调用者线程中，运行当前被丢弃的任务, 由提交任务的线程来执行任务
+				这4中策略不友好，最好自己定义拒绝策略，实现RejectedExecutionHandler接口
+				1. 默认是AbortPolicy （直接抛出异常）
+				2. ThreadPoolExecutor t = new ThreadPoolExecutor(
+											3, 3, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2)
+											,Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+																										new ThreadPoolExecutor.DiscardPolicy());
+																										new ThreadPoolExecutor.DiscardOldestPolicy());
+																										new ThreadPoolExecutor.CallerRunsPolicy());
+				3. 实现RejectedExecutionHandler接口
+总结:
+	线程池主要是通过阻塞队列来实现的，线程池的使用场景主要是异步或者多线程处理任务的场景。
+	线程池的使用可以通过 Executors 来快速创建，但是不推荐使用，因为 Executors 创建的线程池都有一些缺陷，
+	比如无界队列可能导致内存溢出，无限大的线程数可能导致机器负载过高。
+	所以在实际的项目中，建议自定义线程池 ThreadPoolExecutor，根据业务场景来合理的设置线程数，队列大小等参数。
+27. 深入剖析Java定时任务ScheduledThreadPoolExecutor
+		1. executor.schedule() // 一次性任务
+		    executor.scheduleAtFixedRate() // 开始延迟m秒, 每隔n秒执行一次任务
+			executor.scheduleAtFixedRate() // 开始延迟m秒, 任务完成后隔n秒执行一次任务
+		2. ScheduledThreadPoolExecutor 
+			使用一个无界阻塞队列, DelayedWorkQueue()
 ************************************************************************************************************************************************************************************************************
 
 
@@ -1837,7 +2160,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		volatile、synchronized是java关键字, volatile修饰变量, synchronized修饰方法或代码块
 		lock是java的一个接口, 在java.util.concurrent.lock包中
 		通常通过实现该接口的类 如: ReentrantLock来使用
-16). 算法/algorithm和时间复杂度
+16 . 算法/algorithm和时间复杂度
 	1)时间复杂度计算
 		  1. 常数阶
 				时间复杂度都是O(1)
@@ -1854,7 +2177,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			longN =x(log2^x)(log是以2为底)。
 			既然查找了logN次,也就是说while循环的时间复杂度为O(logN),即该函数的时间复杂度为O(logN)。
 		4. 递归->O(2^n)
-17) 锁分类
+17  锁分类
 		1. 乐观锁CAS
 			乐观锁总是假设对共享资源的访问没有冲突，线程可以不停地执行，无需加锁也无需等待。一旦多个线程发生冲突，乐观锁通常使用一种称为 CAS 的技术来保证线程执行的安全性。
 			由于乐观锁假想操作中没有锁的存在，因此不太可能出现死锁的情况，换句话说，乐观锁天生免疫死锁。
@@ -1891,7 +2214,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		16. 死锁相互请求对方的资源
 		17. 锁粗化锁优化技术
 		18. 锁消除锁优化技术
-18) 正则表达式
+18 正则表达式
 	1. +表示1个或多个（如"3"或"225"），*表示0个或多个（[0-9]*）（如""或"1"或"22"），?表示0个或1个([0-9]?)(如""或"7") 
 	2. ^ 从开头进行匹配, $ 结束匹配, 如果没有,则匹配整串字符
 		toString() 会报空指针异常, String.valueOf返回"null"
@@ -1902,7 +2225,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		包装类型的强转和基本类型的强转一样，都会报错的，这也是各种大佬不使用 (String) 去进行强转的原因
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-3. 设计模式
+2. 设计模式
 	1. 创建型模式
 	这类模式提供创建对象的机制, 能够提升已有代码的灵活性和可用性
 		1) 工厂方法/Factory Method
@@ -1964,7 +2287,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 	3) 工厂模式: 工厂设计模式将对象的创建逻辑封装在工厂类中，客户端只需通过工厂类来创建对象，而无需关心具体的实现细节。这样，对象的创建与使用得以分离，提高了系统的灵活性和可维护性。
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-4. Spring
+3. Spring
 1. filter和interceptor的区别
 	在Java的Web开发中，特别是当使用Servlet和Spring等框架时，
 	Filter 和 Interceptor 都是用于处理请求和响应的重要组件。尽管它们在某种程度上具有相似的功能，
@@ -2004,7 +2327,10 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			1. Spring是一个开源的Java应用框架，它提供了一套全面的编程和配置模型
 			2. Spring MVC是Spring框架中的一个模块，它是基于Java的实现MVC设计模式的请求驱动类型的轻量级Web框架。
 			3. Spring Boot是一个用于快速构建现代应用程序的框架，它遵循“约定优于配置”的原则，通过自动化配置和默认设置，减少了繁琐的配置代码，从而简化了开发者的配置工作。
-3. 数据库
+----------------------------------------------------------------------------------------------------------------------------------		
+----------------------------------------------------------------------------------------------------------------------------------	
+4. 数据库
+	
 	1) 存储过程的优点
 		 A、 存储过程允许标准组件式编程
         存储过程创建后可以在程序中被多次调用执行，而不必重新编写该存储过程的SQL语句。而且数据库专业人员可以随时对存储过程进行修改，但对应用程序源代码却毫无影响，从而极大的提高了程序的可移植性。
@@ -2015,9 +2341,26 @@ start()方法是一个native方法（native方法：一个java调用而非java�
         对于同一个针对数据库对象的操作，如果这一操作所涉及到的T-SQL语句被组织成一存储过程，那么当在客户机上调用该存储过程时，网络中传递的只是该调用语句，否则将会是多条SQL语句。从而减轻了网络流量，降低了网络负载。
         D、 存储过程可被作为一种安全机制来充分利用
         系统管理员可以对执行的某一个存储过程进行权限限制，从而能够实现对某些数据访问的限制，避免非授权用户对数据的访问，保证数据的安全。
+	2) 并发事务
+		事务（Transaction）是访问并可能更新数据库中各项数据项的一个程序执行单元（unit）。 事务由事务开始（begin transaction）和事务结束（end transaction）之间执行的全体操作组成。
+		事务的四个特征（ACID）: 原子性（Atomicity）, 一致性（Consistency）, 隔离性（Isolation）, 持久性（Durability）
+		分布式事务:
+			CAP理论指的是在一个分布式系统中，不能同时满足一致性(Consistency)、可用性(Avalibality)、分区容错性(Partition Tolerance)。
+***********并发事务所产生的3个问题
+										1. 脏读: 读到了其他事务未提交的数据
+										2. 不可重复读: 在一个事务内，最开始读到的数据和事务结束前的任意时刻读到的同一批数据出现不一致的情况。
+										3. 幻读，并不是说两次读取获取的结果集不同，幻读侧重的方面是某一次的 select 操作得到的结果所表征的数据状态无法支撑后续的业务操作。
+											更为具体一些：select 某记录是否存在，不存在，准备插入此记录，但执行 insert 时发现此记录已存在，无法插入，此时就发生了幻读。
+										不可重复读侧重表达 读-读，幻读则是说 读-写，用写来证实读的是鬼影。
+***********事务的隔离级别
+						上述所说的"脏读"，“不可重复读”，"幻读"这些问题，其实就是数据库读一致性问题，必须由数据库提供的事务隔离机制来进行解决。
+										1. 读未提交: 没有隔离效果
+										2. 读已提交: 解决脏读, Oracle默认隔离级别
+										3. 可重复读: 解决脏读, 不可重复读. MySQL默认事务隔离级别.
+										4. 串行化: 解决脏读, 不可重复读, 幻读. 读的时候加共享锁, 其他事务可以并发读不能写. 写的时候加上排他锁/独占锁/写锁, 其他事务不能并发写也不能并发读.
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-3. 操作系统
+5. 操作系统
 	1) 进程: 是对运行时程序的封装，是系统进行资源调度和分配的基本单位，实现了操作系统的并发。
 		线程: 是进程的子任务，是 CPU 调度和分派的基本单位，实现了进程内部的并发。
 	2). CMD
@@ -2029,6 +2372,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		物理层, 数据链路层, 
 		网络层, 传输层,  会话层,  
 		表示层, 应用层		
+
 *******************************************
 SAP
 
