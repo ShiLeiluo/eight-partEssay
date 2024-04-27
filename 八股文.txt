@@ -72,7 +72,7 @@
 			一种非线性的数据结构，具有层次关系。
 			常见类型有：二叉树、红黑树、AVL树、B树、B+树等。
 			广泛用于数据库索引、文件系统、搜索引擎等。
-		6) 图(Gragh)
+		6) 图(Graph)
 			由顶点和边组成的数据结构，表示对象之间的多对多关系。
 			常用于表示网络、社交关系等。
 		7) 哈希表(Hash Table)
@@ -83,6 +83,52 @@
 			一种特殊的树形数据结构，用于实现优先队列。
 			最大堆：父节点值大于等于子节点值，常用于实现最大数据项的快速读取。
 			最小堆：父节点值小于等于子节点值，常用于实现最小数据项的快速读取。
+			
+----------------二叉树
+叶子节点: 没有子结点（即度为0）的结点
+		   度: 结点拥有的子树数目称为结点的度
+		    1. 二叉树
+				二叉树是每个节点最多有两个子树的树结构
+			2. 完全二叉树：
+				除最后一层外，每一层上的结点数均达到最大值；在最后一层上只缺少右边的若干结点
+			3. 满二叉树
+				除最后一层无任何子节点外，每一层上的所有结点都有两个子结点的二叉树
+			4. 二叉搜索树/二叉排序树/二叉查找树
+				若它的左子树不空，则左子树上所有结点的值均小于它的根结点的值； 若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值； 它的左、右子树也分别为二叉排序树
+				二叉搜索树作为一种经典的数据结构，它既有链表的快速插入与删除操作的特点，又有数组快速查找的优势；所以应用十分广泛，例如在文件系统和数据库系统一般会采用这种数据结构进行高效率的排序与检索操作。
+				中序遍历: 二叉搜索树中序遍历得到的值序列是递增有序的
+				***特殊情况：每个节点只有右节点
+										这种情况下，二叉搜索树已经变更为链表，搜索一个元素的时间复杂度从O(lgn)退化为O(n)出现这种情况的原因是二叉搜索树没有自平衡的机制，所以就有了平衡二叉树
+			5. 平衡二叉树
+				平衡二叉树是一种概念，是二叉查找树的一个进化体，它有几种实现方式：红黑树、AVL树
+					它是一个空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是平衡二叉树，如果插入或者删除一个节点使得高度之差大于1，就要进行节点之间的旋转，将二叉树重新维持在一个平衡状态。
+					这个方案很好的解决了二叉查找树退化成链表的问题，把插入，查找，删除的时间复杂度最好情况和最坏情况都维持在O(logN)。但是频繁旋转会使插入和删除牺牲掉O(logN)左右的时间，不过相对二叉查找树来说，时间上稳定了很多
+				AVL实现平衡的关键在于旋转操作：
+					插入和删除可能破坏二叉树的平衡，此时需要通过一次或多次树旋转来重新平衡这个树。当插入数据时，最多只需要1次旋转(单旋转或双旋转)；但是当删除数据时，会导致树失衡，AVL需要维护从被删除节点到根节点这条路径上所有节点的平衡，旋转的量级为O(lgn)
+					由于旋转的耗时，AVL树在删除数据时效率很低；在删除操作较多时，维护平衡所需的代价可能高于其带来的好处，因此AVL实际使用并不广泛
+			6. 红黑树
+				红黑树是一种平衡二叉查找树的变体，它的左右子树高差有可能大于1，所以红黑树不是严格意义上的平衡二叉树（AVL），但对之进行平衡的代价较低， 其平均统计性能要强于 AVL
+				红黑树的特性:
+					1. 每个节点或者是黑色，或者是红色
+					2. 根节点是黑色
+					3. 每个叶结点是黑色
+					4. 如果一个节点是红色的，则它的子节点必须是黑色的，红色节点的孩子和父亲都不能是红色。
+					从每个叶子到根的所有路径上不能有两个连续的红色节点，任意一结点到每个叶子结点的路径都包含数量相同的黑结点。
+					确保没有一条路径会比其他路径长出俩倍。因而，红黑树是相对接近平衡的二叉树，并不是一个完美平衡二叉查找树
+		**************************
+					红黑树和AVL树区别:
+					RB-Tree和AVL树作为二叉搜索树(BBST)，其实现的算法时间复杂度相同，
+					AVL作为最先提出的BBST，貌似RB-tree实现的功能都可以用AVL树是代替，那么为什么还需要引入RB-Tree呢
+						AVL更平衡，结构上更加直观，时间效能针对读取而言更高；维护稍慢，空间开销较大。
+						红黑树，读取略逊于AVL，维护强于AVL，空间开销与AVL类似，内容极多时略优于AVL，维护优于AVL。
+			7. B树类型
+				1) B-树
+							一种平衡的多叉树，称为B树（或B-树、B_树，B：balanced说明B树和平衡树有关系）
+							B树是为磁盘等辅存设备设计的多路平衡查找树，与二叉树相比，B树的每个非叶节点可以有多个子树。 因此，当总节点数量相同时，B树的高度远远小于AVL树和红黑树(B树是一颗“矮胖子”)，磁盘IO次数大大减少
+				2) B+树
+							B+树是B树的一种变形形式，B+树上的叶子结点存储关键字以及相应记录的地址，叶子结点以上各层作为索引使用。
+				3) B*树
+							B*树是B+树的变体，在B+树的非根和非叶子结点再增加指向兄弟的指针；
 ***********************************************************************************************
 ***********************************************************************************************
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -225,6 +271,8 @@ Collections是针对集合类的一个帮助类，他提供一系列静态方法
 	computeIfPresent: 有则覆盖，没值的时候不操作
 	相同：返回值是返回最新的值
 	Absent: 缺席
+	
+	Map.getOrDefault
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------				
 ****3. Stack
@@ -578,6 +626,24 @@ AIO 方式适用于连接数目多且连接比较长（重操作）的架构，�
 		当需要进行自动装箱时，如果数字在 -128 至 127 之间时，会直接使用缓存中的对象，而不是重新创建一个对象。
 		自动装箱, 自动拆箱耗性能
 4. 深入理解Java浅拷贝与深拷贝
+		浅拷贝克隆的对象中，引用类型的字段指向的是同一个，当改变任何一个对象，另外一个对象也会随之改变，除去字符串的特殊性外
+		通过 clone() 方法实现的深拷贝比较笨重，因为要将所有的引用类型都重写 clone() 方法，当嵌套的对象比较多的时候，就废了
+		利用序列化: 序列化是将对象写到流中便于传输，而反序列化则是将对象从流中读取出来
+		写入流中的对象就是对原始对象的拷贝。需要注意的是，每个要序列化的类都要实现 Serializable 接口，该接口和 Cloneable 接口类似，都是标记型接口。
+			//深度拷贝
+			public Object deepClone() throws IOException, ClassNotFoundException {
+				// 序列化
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ObjectOutputStream oos = new ObjectOutputStream(bos);
+
+				oos.writeObject(this);
+
+				// 反序列化
+				ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+				ObjectInputStream ois = new ObjectInputStream(bis);
+
+				return ois.readObject();
+			}
 对象
 	1) 不管是浅拷贝还是深拷贝，都可以通过调用 Object 类的 clone() 方法来完成。
 	2) clone() 方法同时是一个本地（native）方法
@@ -621,6 +687,7 @@ AIO 方式适用于连接数目多且连接比较长（重操作）的架构，�
 			1. 提高程序的灵活性和扩展性: 动态创建, 控制类, 降低了模块的耦合性
 			2. 方便获取类信息: 运行时得到变量,方法
 				访问私有方法和字段时，我们需要调用 setAccessible(true) 方法来允许访问
+				将值 设为true,压制(或者叫取消)java语言访问检查
 			3. 提高代码复用率: 框架基础
 		3) 应用场景
 			1. 开发通用框架：像 Spring，为了保持通用性，通过配置文件来加载不同的对象，调用不同的方法。
@@ -670,6 +737,33 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 3) 实现Callable接口
 实现 Callable 接口，重写 call 方法，这种方式可以通过 FutureTask 获取任务执行的返回值。
 
+*****而匿名内部类通常只用于创建一次性的线程对象。
+	其它3种变形
+		1.  匿名内部类创建 Thread 子类对象（匿名内部类 创建的是 子类）
+			// 继承Thread类创建的线程类可以被多次实例化并启动多个线程，而匿名内部类通常只用于创建一次性的线程对象。
+			// 使用匿名类创建 Thread 子类对象
+			Thread t1 = new Thread() {
+				@Override
+				public void run() {
+					System.out.println("使用匿名类创建 Thread 子类对象");
+			   }
+			};
+		2. 匿名内部类创建 Runnable 子类对象
+			// 使用匿名类创建 Runnable 子类对象
+			Thread t2 = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					System.out.println("使用匿名类创建 Runnable 子类对象");
+			   }
+			});
+		3. lambda 表达式创建 Runnable 子类对象
+			// 使用 lambda 表达式创建 Runnable 子类对象
+			Thread t3 = new Thread(() -> System.out.println("使用匿名类创建 Thread 子类对象"));
+			Thread t4 = new Thread(() -> {
+				System.out.println("使用匿名类创建 Thread 子类对象");
+			});
+
+	
 2. 控制线程的4个常用方法
 	1. sleep()
 	使当前正在执行的线程暂停指定的毫秒数，也就是进入休眠的状态。
@@ -1130,6 +1224,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 	这里的预期值 E 本质上指的是“旧值”。
 		****CAS 的三大问题
 		尽管 CAS 提供了一种有效的同步手段，但也存在一些问题，主要有以下三个：ABA 问题、长时间自旋、多个共享变量的原子操作。
+			所谓的 ABA 问题，就是一个值原来是 A，变成了 B，又变回了 A。这个时候使用 CAS 是检查不出变化的，但实际上却被更新了两次。
 	    在开发中，我们要根据实际情况来选择使用 CAS 还是使用锁。
 14. 抽象队列同步器AQS
 	1) 什么是抽象队列同步器
@@ -1586,7 +1681,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		Java 主要是通过构建 ThreadPoolExecutor 来创建线程池的。接下来我们看一下线程池是如何构造出来的
 		1. corePoolSize：线程池中用来工作的核心线程数量。
 		2. maximumPoolSize：最大线程数，线程池允许创建的最大线程数。
-		3. keepAliveTime：超出 corePoolSize 后创建的线程存活时间或者是所有线程最大存活时间，取决于配置。
+		3. keepAliveTime：临时线程在空闲状态下的存活时间 (临时线程数=最大线程数-核心线程数)
 		4. unit：keepAliveTime 的时间单位。
 		5. workQueue：任务队列，是一个阻塞队列，当线程数达到核心线程数后，会将任务存储在阻塞队列中。
 		6. threadFactory ：线程池内部创建线程所用的工厂。
@@ -1687,6 +1782,12 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 
         System.out.println("Main thread continues to execute other operations.");
         exec.shutdown();
+-----------------
+execute和submit的区别 :
+											1. execute只能提交Runnable类型的任务，无返回值。
+												submit既能提交Runable类型的任务，返回值为null，也能提交Callable类型的任务，返回值为Future。
+											
+											2. execute会直接抛出任务执行时异常，submit则不会抛出异常，但可以通过Future的get方法将任务执行时的异常重新抛出。
 ******************************************************
 					1. Executor接口
 					2. ExecutorService是Java中对线程池定义的一个接口，它java.util.concurrent包中，在这个接口中定义了和后台任务执行相关的方法
@@ -1703,7 +1804,9 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 						例如，newFixedThreadPool 和 newCachedThreadPool 方法创建的线程池在默认情况下允许无限制地创建线程，这可能导致 OutOfMemoryError。
 							1. newCachedThreadPool 创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。核心线程数无限大
 							2. newFixedThreadPool 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。队列的容量默认无限大
-							3. newScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。
+							3. newScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。maximumPoolSize则是int最大值
+								计划线程池使用的是DelayedWordQueue，它默认大小是16，但是可以动态增长，最大值则是int的最大值
+								定长线程池和单线程线程都使用LinkedBlockingQueue，而LinkedBlockingQueue默认的大小是int的最大值
 							
 							4. newSingleThreadExecutor 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
 					4. AbstractExecutorService
@@ -1830,13 +1933,155 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			executor.scheduleAtFixedRate() // 开始延迟m秒, 任务完成后隔n秒执行一次任务
 		2. ScheduledThreadPoolExecutor 
 			使用一个无界阻塞队列, DelayedWorkQueue()
+		3. 在ScheduledThreadPoolExecutor中，由于使用的是无界队列，ThreadPoolExecutor中maximumPoolSize参数是无效的（因为线程数到达corePoolSize后，新增的任务会放到队列中）。
+		4. Timer和ScheduledThreadPoolExecutor(n)的区别
+			在Java中，Timer和ScheduledThreadPoolExecutor都是用于执行定时或周期性任务的工具，但它们之间存在一些关键的区别。以下是它们之间的主要差异：
+			1. 线程池管理：
+				Timer：Timer内部使用单个后台线程来执行所有定时任务。这意味着所有任务都是串行执行的，如果一个任务执行时间过长，将会影响到其他任务的执行时间。
+				ScheduledThreadPoolExecutor：ScheduledThreadPoolExecutor是一个线程池，它可以根据需要创建多个线程来执行定时任务。这意味着任务可以并发执行，提高了任务的执行效率。
+			2. 任务执行精度：
+				Timer：由于Timer只使用一个线程，因此如果任务执行时间过长，可能会影响到定时任务的精度。
+				ScheduledThreadPoolExecutor：由于可以并发执行任务，ScheduledThreadPoolExecutor通常能提供更好的任务执行精度。
+			3. 异常处理：
+				Timer：如果TimerTask抛出了未检查的异常，Timer将会停止所有任务的执行。这意味着一个任务的失败可能会导致整个Timer的崩溃。
+				ScheduledThreadPoolExecutor：如果某个任务抛出了异常，它只会影响该任务的执行，而不会影响到线程池中的其他任务。
+			4. 灵活性和扩展性：
+				Timer：Timer的API相对简单，但功能也有限。它主要用于简单的定时任务。
+				ScheduledThreadPoolExecutor：ScheduledThreadPoolExecutor提供了更多的API和方法，可以更灵活地管理定时任务，如设置核心线程数、最大线程数、队列容量等。这使得它在处理大量或复杂的定时任务时更加适用。
+			5. 任务取消和调度：
+				Timer：取消任务和重新调度任务在Timer中相对较为简单，但功能有限。
+				ScheduledThreadPoolExecutor：ScheduledThreadPoolExecutor提供了更强大的任务取消和重新调度功能，可以更方便地管理任务的执行。
+			6. 资源利用：
+				Timer：由于只有一个线程，如果任务执行时间过长或频繁，可能会浪费系统资源。
+				ScheduledThreadPoolExecutor：通过线程池管理，ScheduledThreadPoolExecutor可以更好地利用系统资源，避免资源的浪费。
+			总的来说，ScheduledThreadPoolExecutor在功能、灵活性、异常处理以及资源利用等方面都优于Timer。因此，在大多数情况下，推荐使用ScheduledThreadPoolExecutor来执行定时或周期性任务。
+			7. ScheduledThreadPoolExecutor 在 Java 中提供了任务取消和重新调度的功能，这使得它在处理复杂的定时任务场景时具有更高的灵活性和可控性。
+			提交任务时可以得到一个ScheduledFutrue
+				任务取消:
+			在 ScheduledThreadPoolExecutor 中，你可以通过返回的 ScheduledFuture 对象来取消定时任务。
+			ScheduledFuture 是 Future 和 ScheduledFuture 接口的实现，它表示一个异步计算的结果。它提供了 cancel(boolean mayInterruptIfRunning) 方法来取消任务的执行。
+					cancel(true): 正在执行的任务将被中断
+					cancel(false): 不会中断正在执行的任务，只是取消尚未开始执行的任务
+				重新调度: 
+			先取消, 再重新提交一个新的任务
+		小结:
+			ScheduledThreadPoolExecutor是一个定时任务的线程池，它的主要作用是周期性的执行任务。
+			它的实现原理是通过DelayedWorkQueue来保存等待的任务，DelayedWorkQueue是一个无界优先队列，使用数组存储，底层使用堆结构来实现优先队列的功能。
+28. 原子操作类Atomic/Java atomic包中的原子操作类（AtomicInteger）总结
+			volatile < Atomic < Sychronized
+		1. Java 中的原子操作类，如 AtomicInteger 和 AtomicLong，底层就是利用 CAS 来确保变量更新的原子性的。
+		2. Unsafe 类是 Java 中的一个特殊类，用于执行低级、不安全的操作。
+			Unsafe类: 它在sun.misc包中。它里面都是一些native方法，其中就有几个是关于 CAS. 
+		3. CAS 是一种常用的无锁技术，允许在多线程环境中原子地更新值。
+			CAS 是一种原子操作，它是一种系统原语，是一条 CPU 的原子指令，从 CPU 层面已经保证它的原子性。
+		小结:
+			Java 中的 java.util.concurrent.atomic 包提供了一系列类，这些类支持原子操作（即线程安全而无需同步）在单个变量上，这大大减少了并发编程的复杂性。
+			原子操作类主要有这些：
+			1. 原子操作的基本数据类型：AtomicBoolean、AtomicInteger、AtomicLong；
+			2. 原子操作的数组类型：AtomicIntegerArray、AtomicLongArray、AtomicReferenceArray；
+			3. 原子操作的引用类型：AtomicReference、AtomicReferenceFieldUpdater、AtomicMarkableReference；
+29. 魔法类Unsafe
+		1. 只有启动类加载器加载的类才能够调用 Unsafe 类中的方法，这是为了防止这些方法在不可信的代码中被调用。Unsafe 类中的很多基础方法都属于native方法.
+			//native 关键字告诉 JVM 调用的是该方法在外部定义
+			native 关键字在 JDK 源码中很多类中都有，在 Object.java类中，其 getClass() 方法、hashCode()方法、clone() 方法等等都是用 native 关键字修饰的。
+		2. Unsafe 应用
+			1) 内存操作
+				//分配新的本地空间
+				 public native long allocateMemory(long bytes);
+				 //重新调整内存空间的大小
+				 public native long reallocateMemory(long address, long bytes);
+				 //将内存设置为指定值
+				 public native void setMemory(Object o, long offset, long bytes, byte value);
+				 //内存拷贝
+				 public native void copyMemory(Object srcBase, long srcOffset,Object destBase, long destOffset,long bytes);
+				 //清除内存
+				 public native void freeMemory(long address);
+			2) 内存屏障
+				了解 Java 内存模型（JMM）的小伙伴们应该清楚，运行中的线程不是直接读取主内存中变量的，
+				只能操作自己工作内存中的变量，然后同步到主内存中，并且线程的工作内存是不能共享的。
+				在介绍内存屏障前，需要知道编译器和 CPU 会在保证程序输出结果一致的情况下，会对代码进行重排序，从指令优化角度提升性能。
+				而指令重排序可能会带来一个不好的结果，导致 CPU 的高速缓存和内存中数据的不一致，而内存屏障（Memory Barrier）就是通过组织屏障两边的指令重排序从而避免编译器和硬件的不正确优化情况。
+				在硬件层面上，内存屏障是 CPU 为了防止代码进行重排序而提供的指令，不同的硬件平台上实现内存屏障的方法可能并不相同。
+				在 Java8 中，引入了 3 个内存屏障的方法，它屏蔽了操作系统底层的差异，允许在代码中定义、并统一由 jvm 来生成内存屏障指令，来实现内存屏障的功能。Unsafe 中提供了下面三个内存屏障相关方法：
+				//禁止读操作重排序
+				public native void loadFence();
+				 //禁止写操作重排序
+				 public native void storeFence();
+				 //禁止读、写操作重排序
+				 public native void fullFence();
+				内存屏障可以看做对内存随机访问操作中的一个同步点，使得此点之前的所有读写操作都执行后才可以开始执行此点之后的操作。
+				以loadFence方法为例，它会禁止读操作重排序，保证在这个屏障之前的所有读操作都已经完成，并且将缓存数据设为无效，重新从主存中进行加载。
+				看到这估计很多小伙伴们会想到 volatile 关键字了，如果在字段上添加了volatile关键字，就能够实现字段在多线程下的可见性。
+				基于读内存屏障，我们也能实现相同的功能。
+			3) 对象操作
+				01、对象成员属性的内存偏移量获取，以及字段属性值的修改，在上面的例子中我们已经测试过了。
+						除了前面的putInt、getInt方法外，Unsafe 提供了 8 种基础数据类型以及Object的put和get方法，并且所有的put方法都可以越过访问权限，直接修改内存中的数据。
+				02、使用 Unsafe 的allocateInstance方法，允许我们使用非常规的方式进行对象的实例化，
+				通过allocateInstance方法创建对象过程中，不会调用类的构造方法。
+				使用这种方式创建对象时，只用到了Class对象，所以说如果想要跳过对象的初始化阶段或者跳过构造器的安全检查，就可以使用这种方法。
+				在上面的例子中，如果将 A 类的构造方法改为private类型，将无法通过构造方法和反射创建对象，但allocateInstance方法仍然有效。
+				反射创建对象
+					public void setAccessible(boolean flag)  
+					将值 设为true,压制(或者叫取消)java语言访问检查。此时我们就可以使用私有的构造方法来创建对象了
+			4) 数组操作
+				在 Unsafe 中，可以使用arrayBaseOffset方法获取数组中第一个元素的偏移地址，使用arrayIndexScale方法可以获取数组中元素间的偏移地址增量
+			5) CAS操作
+				nsafe 类中，提供了compareAndSwapObject、compareAndSwapInt、compareAndSwapLong方法来实现的对Object、int、long类型的 CAS 操作。
+				
+			6) 线程调度
+				1. Unsafe 类中提供了park、unpark、monitorEnter、monitorExit、tryMonitorEnter方法进行线程调度
+				2. LockSupport 的park方法调用了 Unsafe 的park方法来阻塞当前线程，此方法将线程阻塞后就不会继续往后执行，直到有其他线程调用unpark方法唤醒当前线程。
+			7) Class操作
+				Unsafe 对Class的相关操作主要包括类加载和静态变量的操作方法。
+			8) 系统信息
+				Unsafe 中提供的addressSize和pageSize方法用于获取系统信息，调用addressSize方法会返回系统指针的大小，如果在 64 位系统下默认会返回 8，而 32 位系统则会返回 4。
+				调用 pageSize 方法会返回内存页的大小，值为 2 的整数幂。
+	********************
+				CAS（Compare-and-Swap）操作在Java中是一种重要的原子操作，主要用于实现无锁数据结构，提高并发性能。Java在多个地方用到了CAS操作，以下是一些典型的例子：
+				1. java.util.concurrent.atomic包：
+					这个包提供了大量的原子变量类，如AtomicInteger、AtomicLong、AtomicBoolean、AtomicReference等。这些原子变量类内部都使用了CAS操作来确保线程安全地更新变量的值。
+				2. java.util.concurrent.locks包：
+					这个包中的ReentrantLock类在内部实现中使用了CAS操作来尝试获取锁。当锁未被占用时，通过CAS操作将锁的持有者设置为当前线程，从而实现快速获取锁。
+				3. ConcurrentHashMap：
+					Java中的ConcurrentHashMap是一个线程安全的哈希表实现，它使用了分段锁和CAS操作来确保并发访问时的性能。在更新节点值时，ConcurrentHashMap会使用CAS操作来尝试更新节点的值，以避免不必要的锁竞争。
+				4. LongAdder和LongAccumulator：
+					这两个类也是Java 8中引入的用于高性能并发计算的类。它们内部使用了CAS操作和分段计数的方式来减少多线程更新长整型变量时的锁竞争，从而提高性能。
+				5. StampedLock：
+				StampedLock是Java 8中引入的一个新的锁实现，它提供了乐观读、悲观读和写锁三种模式。在乐观读模式下，StampedLock使用CAS操作来检查锁的状态，从而实现无锁读取。
+				6. 自定义无锁数据结构：
+					除了Java标准库提供的类外，开发者在自定义无锁数据结构（如无锁队列、无锁栈等）时，也会广泛使用CAS操作来确保线程安全地更新数据结构的状态。
+					CAS操作虽然能够提高并发性能，但也存在一些问题，如ABA问题（一个值原来是A，后来被线程一改成B，又被线程二改成A，那么CAS检查时发现值仍然为A，误以为没有被修改过）、自旋时间过长导致CPU资源浪费等。
+					因此，在使用CAS操作时，需要权衡其优点和缺点，并根据具体场景选择合适的并发控制策略。
+		总结
+			在本文中，我们首先介绍了 Unsafe 的基本概念、工作原理，并在此基础上，对它的 API 进行了说明与实践。
+			相信大家通过这一过程，能够发现 Unsafe 在某些场景下，确实能够为我们提供编程便利。
+			但在使用这些便利时，确实存在着一些安全上的隐患，在我看来，一项技术具有不安全因素并不可怕，可怕的是它在使用过程中被滥用。
+			尽管之前有传言说会在 Java9 中移除 Unsafe 类，不过它还是照样已经存活到了 JDK 16，
+			按照存在即合理的逻辑，只要使用得当，它还是能给我们带来不少的帮助，因此最后还是建议大家，在使用 Unsafe 的过程中一定要做到使用谨慎使用、避免滥用。
+30. 通信工具类/Java并发编程通信工具类 Semaphore、Exchanger、CountDownLatch、CyclicBarrier、Phaser等一网打尽
+		1. Semaphore
+		2. Exchange
+		3. CountDowmLatch
+		4. CyclicBarrier
+		5. Phaser
+		
 ************************************************************************************************************************************************************************************************************
-
+一、8种基本数据类型
+二、常见的数据结构
+三、Java的集合框架/Java集合框架是基本数据结构在Java语言中的实现和描述。
+四、Java IO	
+五、异常处理
+六、常用工具类
+七、Java新特性(流Stream/Optional/Lambda)
+八、网络编程
+九、Java NIO
+十、Java重要知识点
+十一、并发编程
 
 *****其他知识点#######################################################################################################################################################################
 
 *******************************************
-1. Java
+一. Java
 1.  标识符与关键字
 		 标识符是用于给变量、类、方法、接口等命名的一种符号. 
 		 要求:
@@ -1883,7 +2128,8 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 	结果要么是 true，要么是 false。
 	在反序列化的时候，instanceof 操作符还是蛮常用的，因为这时候我们不太确定对象属不属于指定的类型，如果不进行判断的话，就容易抛出 ClassCastException 异常。
 5) native
-			clone(), hashCode()
+		//native 关键字告诉 JVM 调用的是该方法在外部定义
+			native 关键字在 JDK 源码中很多类中都有，在 Object.java类中，其 getClass() 方法、hashCode()方法、clone() 方法等等都是用 native 关键字修饰的。
 			它用于声明一个方法是原生的（native method）。一个原生方法是使用其他语言（如C、C++或汇编语言）编写的，
 			并且被编译为机器代码，而不是Java字节码。然后，这个机器代码可以通过Java的本地接口（JNI，Java Native Interface）在Java程序中调用。
 			 1)) 访问底层系统资源：Java是一种跨平台的语言，设计初衷是为了避免直接与底层硬件和操作系统进行交互。
@@ -1930,6 +2176,23 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		当写一个 volatile 变量时，JMM 会把该线程在本地内存中的变量强制刷新到主内存中去；
 		这个写操作会导致其他线程中的 volatile 变量缓存无效。
 		volatile关键字可以修饰在类变量或者实例变量上，不能修饰在方法参数，局部变量，实例常量以及类常量上。
+********
+		synchronized和volatile都是Java中用于实现多线程同步的机制，但它们之间存在一些重要的区别。
+		同步机制：
+		synchronized：它利用锁来保证同步，当一个线程进入一个对象的synchronized方法或代码块时，其他线程对该对象的所有synchronized方法或代码块的访问将被阻塞，直到第一个线程退出synchronized方法或代码块。
+		这确保了同一时刻只有一个线程可以执行某个synchronized方法或代码块。
+		volatile：它利用内存屏障来保证可见性和禁止指令重排。当一个变量被声明为volatile时，它确保所有线程都能看到该变量的最新值，即当一个线程修改了这个变量的值，新值对其他线程立即变得可见。
+		但volatile不保证原子性，也就是说，它不能保证复合操作的完整性。
+		内存开销：
+		synchronized：它在使用时有一定的内存开销，因为需要进行锁的申请、释放、等待等操作。这些操作涉及到线程间的通信和协作，因此会带来一定的性能损耗。
+		volatile：它没有锁的开销，通过CPU的缓存一致性实现了数据的可见性。它通常比synchronized具有更小的性能开销。
+		线程安全：
+		synchronized：它是线程安全的，因为它通过锁机制确保了同一时刻只有一个线程可以访问共享资源，从而保证了多线程下数据的准确性。
+		volatile：它本身并不保证线程安全。它只是保证了变量的可见性，但并不能保证复合操作的原子性。对于需要原子性保证的操作，如自增、自减等，volatile是不够的，需要结合其他同步机制（如synchronized或AtomicInteger）来实现线程安全。
+		使用场景：
+		synchronized：适用于需要保证整个方法或代码块的原子性和可见性的情况，或者需要防止多个线程同时访问共享资源的情况。
+		volatile：适用于只需要保证单个变量的可见性，且该变量的操作是简单的读写操作，不需要保证原子性的情况。
+		总结来说，synchronized和volatile在Java中各有其用途，选择使用哪一个取决于具体的场景和需求。对于需要保证整个方法或代码块的原子性和可见性的情况，通常使用synchronized；而对于只需要保证单个变量的可见性，且操作简单的情况，可以使用volatile。
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
 2. 基本数据类型转换
@@ -2066,19 +2329,70 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 12 枚举
 	枚举（enum），是 Java 1.5 时引入的关键字，它表示一种特殊类型的类，继承自 java.lang.Enum。
 	枚举默认实现了 Serializable 接口
-13 线程按顺序执行的几种方法
- 		1). join()
-		2). t1 wait() t2 notify() 唤醒t1
-		3). Countdownlatch latch.await(); // t2线程等待计数器减到零 
-		3). Semaphore    
-			acquire() release() 
-		4).使用ExecutorService和Callable：ExecutorService是一个用于管理和控制线程池的框架。
-			你可以使用ExecutorService的submit()方法提交Callable任务，并使用Future对象获取任务的结果。通过控制任务的提交顺序，你可以控制线程的执行顺序。
-		5). CompletableFuture .supplyAsync thenRun
-			runAsync    get()
-			//等到所有任务都完成
-			CompletableFuture.allOf(c1,c2,,,).get();
-			gulimall/com/atguigu/gulimall/product/service/impl/SkuInfoServiceImpl.java
+13 线程按顺序执行9种方法
+		1) 在子线程中通过join()方法指定顺序
+			join():是Theard的方法，作用是调用线程需等待该join()线程执行完成后，才能继续用下运行。
+			应用场景：当一个线程必须等待另一个线程执行完毕才能执行时可以使用join方法。
+		2) 在主线程中通过join()方法指定顺序
+			 这里是在主线程中使用join()来实现对线程的阻塞。
+		3) 使用线程的wait方法
+			wait():是Object的方法，作用是让当前线程进入等待状态，同时，wait()也会让当前线程释放它所持有的锁。“直到其他线程调用此对象的 notify() 方法或 notifyAll() 方法”，当前线程被唤醒(进入“就绪状态”)
+			notify()和notifyAll():是Object的方法，作用则是唤醒当前对象上的等待线程；notify()是唤醒单个线程，而notifyAll()是唤醒所有的线程。
+			wait(long timeout):让当前线程处于“等待(阻塞)状态”，“直到其他线程调用此对象的notify()方法或 notifyAll() 方法，或者超过指定的时间量”，当前线程被唤醒(进入“就绪状态”)。
+			应用场景：Java实现生产者消费者的方式。
+		4) 使用线程的线程池方法
+			 JAVA通过Executors提供了四种线程池
+				1. 单线程化线程池(newSingleThreadExecutor);
+				2. 可控最大并发数线程池(newFixedThreadPool);
+				3. 可回收缓存线程池(newCachedThreadPool);
+				4. 支持定时与周期性任务的线程池(newScheduledThreadPool)。
+			单线程化线程池(newSingleThreadExecutor):优点，串行执行所有任务。
+			submit()：提交任务。
+			shutdown()：方法用来关闭线程池，拒绝新任务。
+			应用场景:串行执行所有任务。如果这个唯一的线程因为异常结束，那么会有一个新的线程来替代它。此线程池保证所有任务的执行顺序按照任务的提交顺序执行。
+		5) 使用线程的Condition(条件变量)方法
+			Condition  [kənˈdɪʃn]（条件变量）:通常与一个锁关联。需要在多个Contidion中共享一个锁时，可以传递一个Lock/RLock实例给构造方法，否则它将自己生成一个RLock实例。
+				1. Condition中await()方法类似于Object类中的wait()方法。
+				2. Condition中await(long time,TimeUnit unit)方法类似于Object类中的wait(long time)方法。
+				3. Condition中signal()方法类似于Object类中的notify()方法。
+				4. Condition中signalAll()方法类似于Object类中的notifyAll()方法。
+			应用场景：Condition是一个多线程间协调通信的工具类，使得某个，或者某些线程一起等待某个条件（Condition）,只有当该条件具备( signal 或者 signalAll方法被带调用)时 ，这些等待线程才会被唤醒，从而重新争夺锁。
+		6) 使用线程的CountDownLatch（倒计数）方法
+			CountDownLatch  [kaʊnt  daʊn  lætʃ] :位于java.util.concurrent包下，利用它可以实现类似计数器的功能。
+			应用场景:比如有一个任务C，它要等待其他任务A,B执行完毕之后才能执行，此时就可以利用CountDownLatch来实现这种功能了。	
+			await() 方法会使当前线程等待，直到计数器达到零。
+		7) 使用CyclicBarrier(回环栅栏)实现线程按顺序运行
+			 CyclicBarrier(回环栅栏)  [ˈsaɪklɪk   ˈbæriə(r)] :通过它可以实现让一组线程等待至某个状态之后再全部同时执行。
+			 叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用。我们暂且把这个状态就叫做barrier，当调用await()方法之后，线程就处于barrier了。
+			应用场景:公司组织春游,等待所有的员工到达集合地点才能出发，每个人到达后进入barrier状态。都到达后，唤起大家一起出发去旅行。
+		8) 使用Sephmore(信号量)实现线程按顺序运行
+			Sephmore(信号量) [ˈseməfɔː(r)] :Semaphore是一个计数信号量,从概念上将，Semaphore包含一组许可证,如果有需要的话，每个acquire()方法都会阻塞，
+			直到获取一个可用的许可证,每个release()方法都会释放持有许可证的线程，并且归还Semaphore一个可用的许可证。然而，实际上并没有真实的许可证对象供线程使用，Semaphore只是对可用的数量进行管理维护。
+			acquire()   [əˈkwaɪə(r)] :当前线程尝试去阻塞的获取1个许可证,此过程是阻塞的,当前线程获取了1个可用的许可证，则会停止等待，继续执行。
+			release()   [rɪˈliːs] :当前线程释放1个可用的许可证。
+			应用场景:Semaphore可以用来做流量分流，特别是对公共资源有限的场景，比如数据库连接。假设有这个的需求，读取几万个文件的数据到数据库中，
+			由于文件读取是IO密集型任务，可以启动几十个线程并发读取，但是数据库连接数只有10个，这时就必须控制最多只有10个线程能够拿到数据库连接进行操作。这个时候，就可以使用Semaphore做流量控制。
+		9). CompletableFuture 
+			CompletableFuture是对Future的扩展和增强。CompletableFuture实现了Future接口，并在此基础上进行了丰富的扩展，完美弥补了Future的局限性，同时CompletableFuture实现了对任务编排的能力。
+			使用Future获得异步执行结果时，要么调用阻塞方法get()，要么轮询看isDone()是否为true，这两种方法都不是很好，因为主线程也会被迫等待。
+			从Java 8开始引入了CompletableFuture，它针对Future做了改进，可以传入回调对象，当异步任务完成或者发生异常时，自动调用回调对象的回调方法。
+			当任务执行完之后，会通知调用线程来执行回调方法。而在调用回调方法之前，调用线程可以执行其他任务，是非阻塞的。
+			CompletableFuture还提供了串行、AND聚合、OR聚合调用多个任务，以及支持异常处理。
+			CompletableFuture提供了四个静态方法来创建一个异步操作：
+				public static CompletableFuture<Void> runAsync(Runnable runnable)
+				public static CompletableFuture<Void> runAsync(Runnable runnable, Executor executor)
+				public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier)
+				public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor)
+				
+				1. 是否有返回值: runAsync, supplyAsync
+				2. join()和get()方法都是用来获取CompletableFuture异步之后的返回值
+					join()方法抛出的是uncheck异常（即未经检查的异常),不会强制开发者强制捕捉，
+					会将异常包装成CompletionException异常 /CancellationException异常，但是本质原因还是代码内存在的真正的异常
+					get()方法抛出的是经过检查的异常，ExecutionException, InterruptedException 需要用户手动处理/铺抓（抛出或者 try catch）
+				3.  thenRun(Runnable action): 沿用上一个任务的线程池
+				     thenRunAsync(Runnable action): 使用公用的 ForkJoinPool 线程池(不推荐使用公用线程池)
+				     thenRunAsync(Runnable action,Executor executor): 使用自定义线程池(推荐)
+
 14. Java修饰符分为：1.访问修饰符    2.非访问修饰符
 		用来修饰类、方法或变量。
 
@@ -2223,9 +2537,33 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 		Integer.valueOf()和Integer.parseInt()的返回值类型不同
 		基本类型是没有 toString() 方法的, 基本类型转 String 类型时，推荐使用 String.valueOf() 方法。
 		包装类型的强转和基本类型的强转一样，都会报错的，这也是各种大佬不使用 (String) 去进行强转的原因
+20. <<, <<=, >>, >>=
+		1.Java语言中的 << 意思为：逻辑左移，相当于乘2
+				如：2<<1、3 << 2、3<<3
+				2 << 1，则是将数字2左移1位，结果为2*2=4
+				3 << 2，则是将数字3左移2位，结果为3*(2*2)=12
+				3 << 3，则是将数字3左移3位，结果为3*(2*2*2)=24
+		2.Java语言中的 <<= 意思为：左移后赋值,相当于乘2后赋值
+				如：当x = 5时，
+				x <<= 3，则是x = 5*(2*2*2),结果x = 40
+		3.Java语言中的 >> 意思为：逻辑右移，相当于除以2
+				如：8>>1、8>>2
+				8>>1，则是将数字8右移1位，结果为8/2=4
+				8>>2，则是将数字8右移2位，结果为8/(2*2)=2
+		4.Java语言中的 >>= 意思为：右移后赋值，相当于除以2
+				如：当x = 8时，
+				x >>= 2，则是x = 8/(2*2),结果x =2
+				x >>= 3，则是x = 8/(2*2*2),结果x =1
+		5. &, |, ^, !
+			逻辑与: 只有当a, b都为true的时候为true
+			逻辑或: 只有当a, b 都为false的时候为false
+			逻辑异或: a, b 不同则为true, 相同则为false
+			逻辑非: !a 结果与a相反
+21. 双亲委派机制
+		1. 
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-2. 设计模式
+二. 设计模式
 	1. 创建型模式
 	这类模式提供创建对象的机制, 能够提升已有代码的灵活性和可用性
 		1) 工厂方法/Factory Method
@@ -2287,7 +2625,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 	3) 工厂模式: 工厂设计模式将对象的创建逻辑封装在工厂类中，客户端只需通过工厂类来创建对象，而无需关心具体的实现细节。这样，对象的创建与使用得以分离，提高了系统的灵活性和可维护性。
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-3. Spring
+三. Spring
 1. filter和interceptor的区别
 	在Java的Web开发中，特别是当使用Servlet和Spring等框架时，
 	Filter 和 Interceptor 都是用于处理请求和响应的重要组件。尽管它们在某种程度上具有相似的功能，
@@ -2329,7 +2667,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 			3. Spring Boot是一个用于快速构建现代应用程序的框架，它遵循“约定优于配置”的原则，通过自动化配置和默认设置，减少了繁琐的配置代码，从而简化了开发者的配置工作。
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-4. 数据库
+四. 数据库
 	
 	1) 存储过程的优点
 		 A、 存储过程允许标准组件式编程
@@ -2360,7 +2698,7 @@ start()方法是一个native方法（native方法：一个java调用而非java�
 										4. 串行化: 解决脏读, 不可重复读, 幻读. 读的时候加共享锁, 其他事务可以并发读不能写. 写的时候加上排他锁/独占锁/写锁, 其他事务不能并发写也不能并发读.
 ----------------------------------------------------------------------------------------------------------------------------------		
 ----------------------------------------------------------------------------------------------------------------------------------	
-5. 操作系统
+五. 操作系统
 	1) 进程: 是对运行时程序的封装，是系统进行资源调度和分配的基本单位，实现了操作系统的并发。
 		线程: 是进程的子任务，是 CPU 调度和分派的基本单位，实现了进程内部的并发。
 	2). CMD
